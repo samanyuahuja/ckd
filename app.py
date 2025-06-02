@@ -101,7 +101,10 @@ if submit:
 
 
 
-    X_scaled = scaler.transform(X_input[final_features])
+    X_input_ordered = X_input[scaler.feature_names_in_]
+
+    # Scale input
+    X_scaled = scaler.transform(X_input_ordered)
     prediction = model.predict(X_scaled)[0]
     prob = model.predict_proba(X_scaled)[0][1]
 
