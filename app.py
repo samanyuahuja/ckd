@@ -168,7 +168,8 @@ if submit:
     # LIME Explanation
     
 
-    st.subheader("LIME Explanation")
+    
+    st.subheader("🔍 LIME Explanation")
     
     lime_explainer = lime.lime_tabular.LimeTabularExplainer(
         training_data=np.array(X_input[final_features]),
