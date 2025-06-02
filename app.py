@@ -117,25 +117,22 @@ if submit:
     st.success(f"CKD Risk: {'Positive' if prediction == 1 else 'Negative'}")
     st.info(f"Probability of CKD: {prob * 100:.2f}%")
 
-    # SHAP Explanation
     st.subheader("SHAP Explanation")
 
-    # Prepare single-row input
+    # Only one sample for local explanation
     X_single = X_scaled[0:1]
     features_single = X_input[final_features].iloc[0:1]
     
     explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(X_single)
+    shap_values = explainer.shap_values(X_single)  # shape: (1, 23, 2)
     
-    # Handle binary or single-output models
-    if isinstance(shap_values, list) and len(shap_values) > 1:
-        shap_vals_class1 = shap_values[1][0]  # binary classifier, class 1
-        expected_val = explainer.expected_value[1]
-    else:
-        shap_vals_class1 = shap_values[0]
-        expected_val = explainer.expected_value
+    # Extract SHAP values for class 1
+    shap_vals_class1 = shap_values[0][0, :, 1]  # first sample, all features, class 1
     
-    # --- ✅ FORCE PLOT FIX ---
+    # Expected value for class 1
+    expected_val = explainer.expected_value[1] if isinstance(explainer.expected_value, (list, np.ndarray)) else explainer.expected_value
+    
+    # Create SHAP force plot
     force_plot = shap.force_plot(
         expected_val,
         shap_vals_class1,
@@ -144,17 +141,16 @@ if submit:
         show=False
     )
     
-    # Wrap with JS and display in Streamlit
+    # Combine JS and plot
     shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
     st.subheader("SHAP Force Plot")
     html(shap_html, height=300)
     
-    # --- SUMMARY PLOT ---
+    # Optional: SHAP summary plot
     st.subheader("SHAP Summary Plot")
     fig_summary, ax_summary = plt.subplots(figsize=(10, 6))
-    shap.summary_plot(shap_values, features_single, plot_type="bar", show=False)
+    shap.summary_plot(shap_vals_class1.reshape(1, -1), features_single, plot_type="bar", show=False)
     st.pyplot(fig_summary)
-
 
 
 
