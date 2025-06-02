@@ -119,22 +119,27 @@ if submit:
     # SHAP Explanation
     
 
-    st.subheader("SHAP Explanation")
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_scaled)
+    st.write(f"Type of shap_values: {type(shap_values)}")
+    st.write(f"Shape of shap_values: {np.array(shap_values).shape}")
     
-    # Extract the first sample's SHAP values for class 1
-    shap_vals_class1 = shap_values[1][0]
-    expected_val = explainer.expected_value[1]
+    # If shap_values is a list, pick class 1
+    if isinstance(shap_values, list):
+        shap_vals = shap_values[1]  # class 1 shap values
+    else:
+        shap_vals = shap_values  # directly use the array
     
-    # Convert input features to numpy array for force plot
+    # Get first sample shap values (1D)
+    shap_vals_class1 = shap_vals[0]
+    
+    expected_val = explainer.expected_value if not isinstance(explainer.expected_value, list) else explainer.expected_value[1]
+    
     features_for_force = X_input[final_features].iloc[0].to_numpy()
     
-    # Generate the interactive force plot HTML
     shap_html = shap.force_plot(expected_val, shap_vals_class1, features_for_force, matplotlib=False)
-    
-    # Display it in Streamlit app
-    components.html(shap_html.html(), height=300)
+    st.components.v1.html(shap_html.html(), height=300)
+
 
 
 
