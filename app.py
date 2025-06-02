@@ -120,40 +120,46 @@ if submit:
     # SHAP Explanation
     
 
+    # SHAP explanation
     st.subheader("SHAP Explanation")
-
-    # Only take the first input sample (one row)
-    X_single = X_scaled[0:1]
-    features_single = X_input[final_features].iloc[0]
     
-    # Create TreeExplainer
+    # Take first sample only
+    X_single = X_scaled[0:1]
+    features_single = X_input[final_features].iloc[0:1]
+    
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_single)
     
-    # Debugging: log shape and type
+    # Check type and shape
     st.write(f"shap_values type: {type(shap_values)}")
     st.write(f"shap_values shape: {np.array(shap_values).shape}")
     
-    # Access values correctly for binary classification (shape is [1, 23, 2])
-    expected_val = explainer.expected_value[1]
-    shap_vals_class1 = shap_values[0, :, 1]  # sample 0, all features, class 1
+    # Handle binary classification
+    try:
+        expected_val = explainer.expected_value[1]
+        shap_vals_class1 = shap_values[1][0]
+    except:
+        expected_val = explainer.expected_value
+        shap_vals_class1 = shap_values[0]
     
-    # Generate SHAP force plot (HTML)
-    shap_html = shap.force_plot(
+    # Generate force plot and save as HTML
+    force_plot = shap.force_plot(
         expected_val,
         shap_vals_class1,
         features_single,
-        matplotlib=False
+        matplotlib=False,
+        show=False
     )
+    shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
     
     # Display in Streamlit
     st.subheader("SHAP Force Plot")
-    html(shap_html.html(), height=300)
+    html(shap_html, height=300)
     
-    # Optional: SHAP summary bar plot (for class 1)
+    # SHAP summary plot
     st.subheader("SHAP Summary Plot")
     fig_summary, ax_summary = plt.subplots(figsize=(10, 6))
-    shap.summary_plot(shap_values[0, :, 1].reshape(1, -1), features_single.to_frame().T, plot_type="bar", show=False)
+    shap.summary_plot(shap_values, features_single, plot_type="bar", show=False)
     st.pyplot(fig_summary)
 
 
