@@ -18,7 +18,7 @@ model = joblib.load("model.pkl")
 scaler = joblib.load("scaler.pkl")
 
 st.set_page_config(layout="wide")
-st.title("🧠 CKD Risk Predictor with SHAP & LIME")
+st.title("CKD Risk Predictor with SHAP & LIME")
 st.markdown("This app predicts Chronic Kidney Disease (CKD) risk and explains the prediction using SHAP and LIME.")
 
 # Input form
@@ -95,7 +95,7 @@ if submit:
     st.info(f"Probability of CKD: {prob * 100:.2f}%")
 
     # SHAP Explanation
-    st.subheader("📈 SHAP Explanation")
+    st.subheader("SHAP Explanation")
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_scaled)
 
@@ -103,13 +103,13 @@ if submit:
     shap.force_plot(explainer.expected_value[1], shap_values[1], X_input[final_features], matplotlib=True, show=False)
     st.pyplot(fig)
 
-    st.subheader("📊 SHAP Summary Plot")
+    st.subheader("SHAP Summary Plot")
     fig2, ax2 = plt.subplots(figsize=(10, 6))
     shap.summary_plot(shap_values[1], X_input[final_features], plot_type="bar", show=False)
     st.pyplot(fig2)
 
     # LIME Explanation
-    st.subheader("🟢 LIME Explanation")
+    st.subheader("LIME Explanation")
     lime_explainer = lime.lime_tabular.LimeTabularExplainer(
         training_data=np.array(X_scaled),
         feature_names=final_features,
