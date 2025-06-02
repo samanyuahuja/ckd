@@ -12,6 +12,7 @@ from sklearn.inspection import partial_dependence, PartialDependenceDisplay
 import joblib
 import base64
 import io
+import streamlit.components.v1 as components
 
 # Load the model and scaler
 model = joblib.load("model.pkl")
@@ -116,7 +117,7 @@ if submit:
     st.info(f"Probability of CKD: {prob * 100:.2f}%")
 
     # SHAP Explanation
-    import streamlit.components.v1 as components
+    
 
     st.subheader("SHAP Explanation")
     explainer = shap.TreeExplainer(model)
