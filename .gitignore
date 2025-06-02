@@ -1,1 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
 
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+
+# Streamlit logs and cache
+.streamlit/
+*.log
+
+# Jupyter and Colab files
+.ipynb_checkpoints/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Python environment and packages
+*.egg-info/
+*.egg
+*.bak
+*.tmp
+
+# Model & checkpoint files (optional, remove if you want to track .pkl)
+*.pkl
+
+# VSCode settings (optional)
+.vscode/
+
+# Environment files (optional)
+*.env
+.env
