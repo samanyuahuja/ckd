@@ -31,9 +31,10 @@ with st.form("input_form"):
         al = st.slider("Albumin", 0, 5, 1)
         su = st.slider("Sugar", 0, 5, 0)
         rbc = st.selectbox("Red Blood Cells", ["normal", "abnormal"], index=0)
-    with col2:
         pc = st.selectbox("Pus Cell", ["normal", "abnormal"], index=0)
         pcc = st.selectbox("Pus Cell Clumps", ["present", "notpresent"], index=1)
+    with col2:
+        
         ba = st.selectbox("Bacteria", ["present", "notpresent"], index=1)
         bu = st.number_input("Blood Urea", 1.0, 400.0, 50.0)
         sc = st.number_input("Serum Creatinine", 0.1, 50.0, 1.5)
@@ -41,15 +42,16 @@ with st.form("input_form"):
         bgr = st.number_input("Blood Glucose Random (bgr)", 70, 500, 100)
         sod = st.number_input("Sodium (sod)", 100, 150, 140)
         pot = st.number_input("Potassium (pot)", 1.0, 10.0, 4.0)
-    with col3:
         htn = st.selectbox("Hypertension", ["yes", "no"], index=1)
+    with col3:
+        
         dm = st.selectbox("Diabetes Mellitus", ["yes", "no"], index=1)
         appet = st.selectbox("Appetite", ["good", "poor"], index=0)
         ane = st.selectbox("Anemia", ["yes", "no"], index=1)
-        submit = st.form_submit_button("Predict")
         wbcc = st.number_input("White Blood Cell Count (wbcc)", 3000, 15000, 7000)
         rbcc = st.number_input("Red Blood Cell Count (rbcc)", 2.0, 6.0, 4.5)
         pe = st.selectbox("Pedal Edema (pe)", ["yes", "no"], index=1)
+        submit = st.form_submit_button("Predict")
 
 # Map categorical features
 mapper = {
