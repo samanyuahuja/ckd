@@ -119,37 +119,40 @@ if submit:
 
     st.subheader("SHAP Explanation")
 
-    # Only one sample for local explanation
+    # Get single input
     X_single = X_scaled[0:1]
-    features_single = X_input[final_features].iloc[0:1]
+    features_single = X_input[final_features].iloc[0]
     
     explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(X_single)  # shape: (1, 23, 2)
+    shap_values = explainer.shap_values(X_single)
     
-    # Extract SHAP values for class 1
-    shap_vals_class1 = shap_values[0][0, :, 1]  # first sample, all features, class 1
+    # Log shape
+    st.write(f"shap_values shape: {np.array(shap_values).shape}")
     
-    # Expected value for class 1
+    # Extract class 1 SHAP values
+    shap_vals_class1 = shap_values[0, :, 1]  # (23,)
+    
+    # Expected value
     expected_val = explainer.expected_value[1] if isinstance(explainer.expected_value, (list, np.ndarray)) else explainer.expected_value
     
-    # Create SHAP force plot
+    # Create force plot
     force_plot = shap.force_plot(
-        expected_val,
-        shap_vals_class1,
-        features_single,
+        base_value=expected_val,
+        shap_values=shap_vals_class1,
+        features=features_single,
         matplotlib=False,
         show=False
     )
     
-    # Combine JS and plot
+    # Display in Streamlit
     shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
     st.subheader("SHAP Force Plot")
     html(shap_html, height=300)
     
-    # Optional: SHAP summary plot
+    # Summary Plot
     st.subheader("SHAP Summary Plot")
     fig_summary, ax_summary = plt.subplots(figsize=(10, 6))
-    shap.summary_plot(shap_vals_class1.reshape(1, -1), features_single, plot_type="bar", show=False)
+    shap.summary_plot(shap_vals_class1.reshape(1, -1), features_single.to_frame().T, plot_type="bar", show=False)
     st.pyplot(fig_summary)
 
 
