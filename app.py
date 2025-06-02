@@ -123,19 +123,19 @@ if submit:
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_scaled)
     
-    # Handle shap_values output for binary classification
-    if isinstance(shap_values, list) and len(shap_values) == 2:
-        shap_vals_class1 = shap_values[1][0]  # SHAP values for class 1, first (and only) sample
-        expected_val = explainer.expected_value[1]
-    else:
-        shap_vals_class1 = shap_values[0] if shap_values.ndim == 2 else shap_values
-        expected_val = explainer.expected_value
+    # Extract the first sample's SHAP values for class 1
+    shap_vals_class1 = shap_values[1][0]
+    expected_val = explainer.expected_value[1]
     
-    # Create interactive force plot as HTML
-    shap_html = shap.force_plot(expected_val, shap_vals_class1, X_input[final_features].iloc[0], matplotlib=False)
+    # Convert input features to numpy array for force plot
+    features_for_force = X_input[final_features].iloc[0].to_numpy()
     
-    # Display in Streamlit with components.html
+    # Generate the interactive force plot HTML
+    shap_html = shap.force_plot(expected_val, shap_vals_class1, features_for_force, matplotlib=False)
+    
+    # Display it in Streamlit app
     components.html(shap_html.html(), height=300)
+
 
 
 
