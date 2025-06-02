@@ -116,26 +116,26 @@ if submit:
     st.info(f"Probability of CKD: {prob * 100:.2f}%")
 
     # SHAP Explanation
+    import streamlit.components.v1 as components
+
     st.subheader("SHAP Explanation")
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_scaled)
-
-# Handle shap_values: it could be a list or a single array
+    
+    # Handle shap_values output for binary classification
     if isinstance(shap_values, list) and len(shap_values) == 2:
-        shap_vals_class1 = shap_values[1]
+        shap_vals_class1 = shap_values[1][0]  # SHAP values for class 1, first (and only) sample
         expected_val = explainer.expected_value[1]
     else:
-        shap_vals_class1 = shap_values
+        shap_vals_class1 = shap_values[0] if shap_values.ndim == 2 else shap_values
         expected_val = explainer.expected_value
-
-    fig, ax = plt.subplots(figsize=(10, 2))
-    shap.force_plot(expected_val, shap_vals_class1, X_input[final_features], matplotlib=True, show=False)
-    st.pyplot(fig)
     
-    st.subheader("SHAP Summary Plot")
-    fig2, ax2 = plt.subplots(figsize=(10, 6))
-    shap.summary_plot(shap_vals_class1, X_input[final_features], plot_type="bar", show=False)
-    st.pyplot(fig2)
+    # Create interactive force plot as HTML
+    shap_html = shap.force_plot(expected_val, shap_vals_class1, X_input[final_features].iloc[0], matplotlib=False)
+    
+    # Display in Streamlit with components.html
+    components.html(shap_html.html(), height=300)
+
 
 
     # LIME Explanation
