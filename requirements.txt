@@ -1,4 +1,3 @@
-Sure! Here’s a cleaned-up, general-format requirements.txt file based on the packages you listed. This is useful for installing all dependencies in a Python environment:
 
 absl-py==1.4.0
 accelerate==1.7.0
