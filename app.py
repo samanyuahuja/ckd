@@ -121,45 +121,40 @@ if submit:
     # SHAP Explanation
     
 
-    # SHAP Explanation Section
     st.subheader("SHAP Explanation")
-    
+
     # Only take the first input sample (one row)
     X_single = X_scaled[0:1]
-    features_single = X_input[final_features].iloc[0:1]
+    features_single = X_input[final_features].iloc[0]
     
+    # Create TreeExplainer
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_single)
     
-    # Debugging
+    # Debugging: log shape and type
     st.write(f"shap_values type: {type(shap_values)}")
     st.write(f"shap_values shape: {np.array(shap_values).shape}")
     
-    # Safe access for binary classification
-    try:
-        expected_val = explainer.expected_value[1]
-        shap_vals_class1 = shap_values[1][0]  # for class 1
-    except:
-        expected_val = explainer.expected_value
-        shap_vals_class1 = shap_values[0]  # if shap_values is 1D
+    # Access values correctly for binary classification (shape is [1, 23, 2])
+    expected_val = explainer.expected_value[1]
+    shap_vals_class1 = shap_values[0, :, 1]  # sample 0, all features, class 1
     
-    # Generate SHAP force plot HTML
+    # Generate SHAP force plot (HTML)
     shap_html = shap.force_plot(
-        expected_val, 
-        shap_vals_class1, 
-        features_single, 
+        expected_val,
+        shap_vals_class1,
+        features_single,
         matplotlib=False
     )
     
     # Display in Streamlit
-    from streamlit.components.v1 import html
     st.subheader("SHAP Force Plot")
     html(shap_html.html(), height=300)
     
-    # Optional SHAP summary bar plot
+    # Optional: SHAP summary bar plot (for class 1)
     st.subheader("SHAP Summary Plot")
     fig_summary, ax_summary = plt.subplots(figsize=(10, 6))
-    shap.summary_plot(shap_values, features_single, plot_type="bar", show=False)
+    shap.summary_plot(shap_values[0, :, 1].reshape(1, -1), features_single.to_frame().T, plot_type="bar", show=False)
     st.pyplot(fig_summary)
 
 
