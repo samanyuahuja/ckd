@@ -14,6 +14,9 @@ import base64
 import io
 import streamlit.components.v1 as components
 from streamlit.components.v1 import html
+from lime.lime_tabular import LimeTabularExplainer
+from sklearn.inspection import PartialDependenceDisplay
+
 
 # Load the model and scaler
 model = joblib.load("model.pkl")
@@ -159,23 +162,34 @@ if submit:
 
     # LIME Explanation
     st.subheader("LIME Explanation")
-    lime_explainer = lime.lime_tabular.LimeTabularExplainer(
-        training_data=np.array(X_scaled),
+    
+    
+    
+    # Use original input (not scaled) for LIME
+    lime_explainer = LimeTabularExplainer(
+        training_data=np.array(X_input[final_features]),  # Unscaled features
         feature_names=final_features,
+        class_names=['No CKD', 'CKD'],
         mode='classification'
     )
+    
+    # Explain prediction for the first instance
     lime_exp = lime_explainer.explain_instance(
-        data_row=X_scaled[0],
+        data_row=X_input[final_features].iloc[0].values,
         predict_fn=model.predict_proba
     )
-
-    lime_html = lime_exp.as_html()
-    st.components.v1.html(lime_html, height=500)
-
-    # PDP
-    st.subheader("📐 Partial Dependence Plot (PDP)")
+    
+    
+    st.subheader("Partial Dependence Plot (PDP)")
+    
+    # Use original (unscaled) input
     fig_pdp, ax_pdp = plt.subplots(figsize=(8, 4))
     display = PartialDependenceDisplay.from_estimator(
-        model, X_scaled, features=[final_features.index("sc")], ax=ax_pdp
+        model,
+        X_input[final_features],  # Unscaled features
+        features=["sc"],          # Use the column name directly
+        feature_names=final_features,
+        ax=ax_pdp
     )
     st.pyplot(fig_pdp)
+
