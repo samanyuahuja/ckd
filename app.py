@@ -158,38 +158,45 @@ if submit:
     shap.summary_plot(shap_vals_class1.reshape(1, -1), features_single.to_frame().T, plot_type="bar", show=False)
     st.pyplot(fig_summary)
 
+    st.subheader("🔍 Input Data Check for LIME and PDP")
+    st.write("X_input sample:")
+    st.write(X_input[final_features].iloc[0])
+    st.write("Prediction for input row:", model.predict(X_input[final_features].iloc[0:1]))
+    st.write("Prediction probabilities:", model.predict_proba(X_input[final_features].iloc[0:1]))
 
 
     # LIME Explanation
+    
+
     st.subheader("LIME Explanation")
     
-    
-    
-    # Use original input (not scaled) for LIME
-    lime_explainer = LimeTabularExplainer(
-        training_data=np.array(X_input[final_features]),  # Unscaled features
+    lime_explainer = lime.lime_tabular.LimeTabularExplainer(
+        training_data=np.array(X_input[final_features]),
         feature_names=final_features,
         class_names=['No CKD', 'CKD'],
-        mode='classification'
+        mode='classification',
+        discretize_continuous=True
     )
     
-    # Explain prediction for the first instance
     lime_exp = lime_explainer.explain_instance(
         data_row=X_input[final_features].iloc[0].values,
-        predict_fn=model.predict_proba
+        predict_fn=lambda x: model.predict_proba(x).astype(float)
     )
+    
+    fig_lime = lime_exp.as_pyplot_figure()
+    st.pyplot(fig_lime)
+
+    
     
     
     st.subheader("Partial Dependence Plot (PDP)")
     
-    # Use original (unscaled) input
     fig_pdp, ax_pdp = plt.subplots(figsize=(8, 4))
-    display = PartialDependenceDisplay.from_estimator(
+    PartialDependenceDisplay.from_estimator(
         model,
         X_input[final_features],  # Unscaled features
-        features=["sc"],          # Use the column name directly
+        features=["sc"],          # Replace with a valid feature
         feature_names=final_features,
         ax=ax_pdp
     )
     st.pyplot(fig_pdp)
-
