@@ -119,26 +119,46 @@ if submit:
     # SHAP Explanation
     
 
+    # SHAP Explanation Section
+    st.subheader("SHAP Explanation")
+    
+    # Only take the first input sample (one row)
+    X_single = X_scaled[0:1]
+    features_single = X_input[final_features].iloc[0:1]
+    
     explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(X_scaled)
-    st.write(f"Type of shap_values: {type(shap_values)}")
-    st.write(f"Shape of shap_values: {np.array(shap_values).shape}")
+    shap_values = explainer.shap_values(X_single)
     
-    # If shap_values is a list, pick class 1
-    if isinstance(shap_values, list):
-        shap_vals = shap_values[1]  # class 1 shap values
-    else:
-        shap_vals = shap_values  # directly use the array
+    # Debugging
+    st.write(f"shap_values type: {type(shap_values)}")
+    st.write(f"shap_values shape: {np.array(shap_values).shape}")
     
-    # Get first sample shap values (1D)
-    shap_vals_class1 = shap_vals[0]
+    # Safe access for binary classification
+    try:
+        expected_val = explainer.expected_value[1]
+        shap_vals_class1 = shap_values[1][0]  # for class 1
+    except:
+        expected_val = explainer.expected_value
+        shap_vals_class1 = shap_values[0]  # if shap_values is 1D
     
-    expected_val = explainer.expected_value if not isinstance(explainer.expected_value, list) else explainer.expected_value[1]
+    # Generate SHAP force plot HTML
+    shap_html = shap.force_plot(
+        expected_val, 
+        shap_vals_class1, 
+        features_single, 
+        matplotlib=False
+    )
     
-    features_for_force = X_input[final_features].iloc[0].to_numpy()
+    # Display in Streamlit
+    from streamlit.components.v1 import html
+    st.subheader("SHAP Force Plot")
+    html(shap_html.html(), height=300)
     
-    shap_html = shap.force_plot(expected_val, shap_vals_class1, features_for_force, matplotlib=False)
-    st.components.v1.html(shap_html.html(), height=300)
+    # Optional SHAP summary bar plot
+    st.subheader("SHAP Summary Plot")
+    fig_summary, ax_summary = plt.subplots(figsize=(10, 6))
+    shap.summary_plot(shap_values, features_single, plot_type="bar", show=False)
+    st.pyplot(fig_summary)
 
 
 
