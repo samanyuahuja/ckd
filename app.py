@@ -120,14 +120,23 @@ if submit:
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_scaled)
 
-    fig, ax = plt.subplots(figsize=(10, 2))
-    shap.force_plot(explainer.expected_value[1], shap_values[1], X_input[final_features], matplotlib=True, show=False)
-    st.pyplot(fig)
+# Handle shap_values: it could be a list or a single array
+    if isinstance(shap_values, list) and len(shap_values) == 2:
+        shap_vals_class1 = shap_values[1]
+        expected_val = explainer.expected_value[1]
+    else:
+        shap_vals_class1 = shap_values
+        expected_val = explainer.expected_value
 
+    fig, ax = plt.subplots(figsize=(10, 2))
+    shap.force_plot(expected_val, shap_vals_class1, X_input[final_features], matplotlib=True, show=False)
+    st.pyplot(fig)
+    
     st.subheader("SHAP Summary Plot")
     fig2, ax2 = plt.subplots(figsize=(10, 6))
-    shap.summary_plot(shap_values[1], X_input[final_features], plot_type="bar", show=False)
+    shap.summary_plot(shap_vals_class1, X_input[final_features], plot_type="bar", show=False)
     st.pyplot(fig2)
+
 
     # LIME Explanation
     st.subheader("LIME Explanation")
