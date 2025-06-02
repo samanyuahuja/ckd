@@ -13,8 +13,7 @@ import joblib
 import base64
 import io
 import streamlit.components.v1 as components
-from streamlit.components.v1 
-import html
+from streamlit.components.v1 import html
 
 # Load the model and scaler
 model = joblib.load("model.pkl")
