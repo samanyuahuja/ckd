@@ -38,12 +38,18 @@ with st.form("input_form"):
         bu = st.number_input("Blood Urea", 1.0, 400.0, 50.0)
         sc = st.number_input("Serum Creatinine", 0.1, 50.0, 1.5)
         hemo = st.number_input("Hemoglobin", 3.0, 17.0, 12.0)
+        bgr = st.number_input("Blood Glucose Random (bgr)", 70, 500, 100)
+        sod = st.number_input("Sodium (sod)", 100, 150, 140)
+        pot = st.number_input("Potassium (pot)", 1.0, 10.0, 4.0)
     with col3:
         htn = st.selectbox("Hypertension", ["yes", "no"], index=1)
         dm = st.selectbox("Diabetes Mellitus", ["yes", "no"], index=1)
         appet = st.selectbox("Appetite", ["good", "poor"], index=0)
         ane = st.selectbox("Anemia", ["yes", "no"], index=1)
         submit = st.form_submit_button("Predict")
+        wbcc = st.number_input("White Blood Cell Count (wbcc)", 3000, 15000, 7000)
+        rbcc = st.number_input("Red Blood Cell Count (rbcc)", 2.0, 6.0, 4.5)
+        pe = st.selectbox("Pedal Edema (pe)", ["yes", "no"], index=1)
 
 # Map categorical features
 mapper = {
@@ -59,36 +65,46 @@ mapper = {
 
 if submit:
     X_input = pd.DataFrame({
-        "age": [age],
-        "bp": [bp],
-        "sg": [sg],
-        "al": [al],
-        "su": [su],
-        "rbc": [mapper[rbc]],
-        "pc": [mapper[pc]],
-        "pcc": [mapper[pcc]],
-        "ba": [mapper[ba]],
-        "bu": [bu],
-        "sc": [sc],
-        "hemo": [hemo],
-        "htn": [mapper[htn]],
-        "dm": [mapper[dm]],
-        "appet": [mapper[appet]],
-        "ane": [mapper[ane]]
-    })
+    "age": [age],
+    "bp": [bp],
+    "sg": [sg],
+    "al": [al],
+    "su": [su],
+    "rbc": [mapper[rbc]],
+    "pc": [mapper[pc]],
+    "pcc": [mapper[pcc]],
+    "bgr": [bgr],
+    "bu": [bu],
+    "sc": [sc],
+    "sod": [sod],
+    "pot": [pot],
+    "hemo": [hemo],
+    "wbcc": [wbcc],
+    "rbcc": [rbcc],
+    "htn": [mapper[htn]],
+    "dm": [mapper[dm]],
+    "appet": [mapper[appet]],
+    "pe": [mapper[pe]]
+})
+
 
     # Add derived features
-    X_input["high_creatinine"] = (X_input["sc"] > 1.2).astype(int)
     X_input["bun_sc_ratio"] = X_input["bu"] / X_input["sc"]
+    X_input["high_creatinine"] = (X_input["sc"] > 1.2).astype(int)
     X_input["hemo_bu"] = X_input["hemo"] / (X_input["bu"] + 1)
 
+
     # Reorder columns
-    final_features = ['age', 'bp', 'sg', 'al', 'su', 'rbc', 'pc', 'pcc', 'ba', 'bu', 'sc', 'hemo',
-                      'htn', 'dm', 'appet', 'ane', 'high_creatinine', 'bun_sc_ratio', 'hemo_bu']
+    final_features = ['age', 'bp', 'sg', 'al', 'su', 'rbc', 'pc', 'pcc', 'bgr', 'bu', 'sc', 'sod', 'pot',
+                      'hemo', 'wbcc', 'rbcc', 'htn', 'dm', 'appet', 'pe', 'bun_sc_ratio',
+                      'high_creatinine', 'hemo_bu']
+
+
 
     X_scaled = scaler.transform(X_input[final_features])
     prediction = model.predict(X_scaled)[0]
     prob = model.predict_proba(X_scaled)[0][1]
+
 
     st.subheader("🔍 Prediction Result")
     st.success(f"CKD Risk: {'Positive' if prediction == 1 else 'Negative'}")
