@@ -301,29 +301,27 @@ if 'X_input' in locals() and not X_input.empty:
         explainer = shap.TreeExplainer(model)
         shap_values_full = explainer.shap_values(X_scaled)
     
-        idx = instance_to_explain_idx  # the instance index you want to explain
+        idx = instance_to_explain_idx
     
-        if isinstance(explainer.expected_value, list):
-            # Multi-class output
-            expected_value = explainer.expected_value[1]  # baseline for class 1
+        st.write(f"explainer.expected_value = {explainer.expected_value}")
+    
+        if isinstance(explainer.expected_value, (list, np.ndarray)):
+            expected_value = explainer.expected_value[1]
             shap_values_for_instance = shap_values_full[1][idx]
             shap_values_class1_full = shap_values_full[1]
         else:
-            # Single output
             expected_value = explainer.expected_value
             shap_values_for_instance = shap_values_full[idx]
             shap_values_class1_full = shap_values_full
     
-        # SHAP Force Plot for the selected instance
         shap_html = shap.plots.force(
             expected_value,
             shap_values_for_instance,
-            X_input_single_df.iloc[idx],  # pass a single row as pandas Series or DataFrame
+            X_input_single_df.iloc[idx],
             matplotlib=False
         )
         components.html(shap_html.html(), height=300)
     
-        # SHAP Summary Plot for the whole dataset
         st.subheader("📊 SHAP Summary Plot")
         fig_summary, ax = plt.subplots(figsize=(10, 6))
         shap.summary_plot(shap_values_class1_full, X_input, plot_type="bar", show=False)
