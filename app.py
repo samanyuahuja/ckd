@@ -18,6 +18,8 @@ import os # Import the os module
 import shap
 from streamlit_shap import st_shap
 from streamlit.components.v1 import html
+import warnings
+warnings.filterwarnings("ignore")
 
 # Load model and scaler
 try:
@@ -357,27 +359,23 @@ if 'X_input' in locals() and not X_input.empty:
     st.subheader(f"🟢 LIME Explanation (Instance {instance_to_explain_idx})")
     
     try:
-        # Prepare background data for LIME
         if 'X_train_scaled' in locals():
             background_data_for_lime = X_train_scaled
-            st.write(f"Using X_train_scaled with shape: {background_data_for_lime.shape} as LIME background.")
+            st.write(f"✅ Using X_train_scaled with shape: {background_data_for_lime.shape} for LIME.")
         else:
-            # Duplicate current single instance to have at least 100 samples for LIME background
-            dup_count = 100
-            background_data_for_lime = np.tile(X_scaled_single, (dup_count, 1))
-            st.write(f"No X_train_scaled found; duplicated X_scaled_single {dup_count} times for LIME background.")
+            background_data_for_lime = np.tile(X_scaled_single, (100, 1))
+            st.write("⚠️ No X_train_scaled found; duplicated X_scaled_single 100 times for LIME background.")
             st.write(f"LIME background data shape: {background_data_for_lime.shape}")
     
-        lime_explainer = lime_tabular.LimeTabularExplainer(
+        lime_explainer = LimeTabularExplainer(
             training_data=background_data_for_lime,
             feature_names=final_features,
             class_names=['No CKD', 'CKD'],
             mode='classification'
         )
     
-        # Explain the single instance
         lime_exp = lime_explainer.explain_instance(
-            X_scaled_single[0],  # single row as 1d array
+            X_scaled_single[0],
             model.predict_proba,
             num_features=10
         )
@@ -385,10 +383,9 @@ if 'X_input' in locals() and not X_input.empty:
         st.pyplot(fig_lime)
     
     except Exception as e:
-        st.error(f"Error generating LIME plot: {e}")
+        st.error(f"❌ Error generating LIME plot: {e}")
     
-    
-    # Partial Dependence Plot (PDP)
+    # ----------------- PDP Explanation --------------------
     st.subheader("📐 Partial Dependence Plot (PDP)")
     
     try:
@@ -396,17 +393,13 @@ if 'X_input' in locals() and not X_input.empty:
         if feature_to_plot:
             if 'X_train_scaled' in locals():
                 pdp_data = X_train_scaled
-                st.write(f"Using X_train_scaled with shape: {pdp_data.shape} for PDP.")
+                st.write(f"✅ Using X_train_scaled with shape: {pdp_data.shape} for PDP.")
             else:
-                # Duplicate current single instance to have enough samples for PDP
-                dup_count_pdp = 200
-                pdp_data = np.tile(X_scaled_single, (dup_count_pdp, 1))
-                st.write(f"No X_train_scaled found; duplicated X_scaled_single {dup_count_pdp} times for PDP.")
+                pdp_data = np.tile(X_scaled_single, (200, 1))
+                st.write("⚠️ No X_train_scaled found; duplicated X_scaled_single 200 times for PDP.")
                 st.write(f"PDP data shape: {pdp_data.shape}")
     
-            # Convert to DataFrame for PDP function
             pdp_data_df = pd.DataFrame(pdp_data, columns=final_features)
-    
             feature_index = final_features.index(feature_to_plot)
             st.write(f"Generating PDP for feature '{feature_to_plot}' at index {feature_index}")
     
@@ -421,4 +414,4 @@ if 'X_input' in locals() and not X_input.empty:
             st.pyplot(fig_pdp)
     
     except Exception as e:
-        st.error(f"Error generating PDP plot: {e}")
+        st.error(f"❌ Error generating PDP plot: {e}")
