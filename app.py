@@ -408,27 +408,38 @@ if 'X_input' in locals() and not X_input.empty:
     # --------------------- PDP ---------------------
     st.subheader("📐 Partial Dependence Plot (PDP)")
 
+    # Let user choose which feature to visualize
+    feature_to_plot = st.selectbox("🔍 Select feature for PDP", final_features)
+    
     try:
-        feature_to_plot = st.selectbox("🔍 Select feature for PDP", final_features)
         feature_index = final_features.index(feature_to_plot)
     
-        # Handle missing training data
-        if 'X_train_scaled' in globals():
+        # Choose data source for PDP
+        if 'X_train_scaled' in globals() and X_train_scaled.shape[0] >= 200:
             pdp_data = X_train_scaled[:200]
-            st.info("✅ Using X_train_scaled as PDP background.")
+            st.info("✅ Using first 200 rows from X_train_scaled as background for PDP.")
         else:
+            # Duplicate and add noise for synthetic variation
             pdp_data = np.repeat(X_scaled_single, 200, axis=0)
-            st.warning("⚠️ No X_train_scaled found; duplicated X_scaled_single 200 times for PDP.")
+            noise = np.random.normal(0, 0.01, pdp_data.shape)  # Small Gaussian noise
+            pdp_data += noise
+            st.warning("⚠️ No X_train_scaled found; using X_scaled_single with added noise as PDP background.")
     
-        st.write("PDP data shape:", pdp_data.shape)
-        st.write(f"Generating PDP for feature '{feature_to_plot}' at index {feature_index}")
+        # Debug output
+        st.text(f"PDP data shape: {pdp_data.shape}")
+        st.text(f"Generating PDP for feature '{feature_to_plot}' at index {feature_index}")
     
+        # Convert to DataFrame with feature names for compatibility
         pdp_df = pd.DataFrame(pdp_data, columns=final_features)
-        fig_pdp, ax_pdp = plt.subplots(figsize=(8, 5))
     
+        # Plot
+        fig_pdp, ax_pdp = plt.subplots(figsize=(8, 5))
         PartialDependenceDisplay.from_estimator(
-            model, pdp_df, features=[feature_index],
-            feature_names=final_features, ax=ax_pdp
+            model,
+            pdp_df,
+            features=[feature_index],
+            feature_names=final_features,
+            ax=ax_pdp
         )
         st.pyplot(fig_pdp)
     
