@@ -296,51 +296,28 @@ if 'X_input' in locals() and not X_input.empty:
 
     # SHAP Explanation (for the single instance selected or the first instance)
     st.subheader("📈 SHAP Explanation")
-    shap.initjs()
-    # Re-calculate explainer and shap_values for the dataset being predicted on
-    # This is important because shap_values should correspond to X_scaled
+
     try:
         explainer = shap.TreeExplainer(model)
         shap_values_full = explainer.shap_values(X_scaled)
         shap_values_class1_full = shap_values_full[1] if isinstance(shap_values_full, list) else shap_values_full
         expected_value = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
     
-        shap_html = shap.force_plot(expected_value, shap_vals_class1_single, X_input_single_df, matplotlib=False)
+        # Use correct variables for the instance you want to explain
+        # E.g. if instance_to_explain_idx and X_input_single_df are defined:
+        shap_html = shap.plots.force(
+            expected_value,
+            shap_values_class1_full[instance_to_explain_idx],
+            X_input_single_df,
+            matplotlib=False
+        )
         components.html(shap_html.html(), height=300)
     
-    except Exception as e:
-        st.error(f"Error generating SHAP plots: {e}")
-
-        # Force plot for the selected instance
-        # Force plot for the selected instance
-        
-         # <-- Add this once at the top of your script
-        
-        # ... your code ...
-        
-        try:
-            explainer = shap.TreeExplainer(model)
-            shap_values = explainer.shap_values(X_scaled)
-            
-            st.subheader("SHAP Force Plot (Instance " + str(instance_to_explain_idx) + ")")
-            
-            shap_html = shap.plots.force(
-                explainer.expected_value[1], 
-                shap_values[1][instance_to_explain_idx], 
-                X_input_single_df,
-                matplotlib=False
-            )
-            components.html(shap_html.html(), height=300)
-        
-        except Exception as e:
-            st.error(f"Error generating SHAP plots: {e}")
-        # SHAP Summary plot for the whole dataset (if uploaded multiple rows) or single row (if manual)
         st.subheader("📊 SHAP Summary Plot")
-        fig_summary, ax = plt.subplots(figsize=(10, 6)) # Added figure size
-        # Use the full SHAP values for the summary plot
+        fig_summary, ax = plt.subplots(figsize=(10, 6))
         shap.summary_plot(shap_values_class1_full, X_input, plot_type="bar", show=False)
         st.pyplot(fig_summary)
-
+    
     except Exception as e:
         st.error(f"Error generating SHAP plots: {e}")
 
