@@ -305,11 +305,15 @@ if 'X_input' in locals() and not X_input.empty:
         expected_value = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
 
         # Force plot for the selected instance
+        # Force plot for the selected instance
         st.subheader("SHAP Force Plot (Instance " + str(instance_to_explain_idx) + ")")
-        # Use the single instance data X_input_single_df for feature values
-        shap_html = shap.force_plot(expected_value, shap_vals_class1_single, X_input_single_df, matplotlib=False)
+    
+    # Generate SHAP force plot using new syntax
+        shap_plot = shap.plots.force(expected_value, shap_vals_class1_single, X_input_single_df)
+        
+        # Embed it in Streamlit using HTML
         from streamlit.components.v1 import html
-        html(shap_html.html(), height=300)
+        html(shap_plot.html(), height=300)
 
         # SHAP Summary plot for the whole dataset (if uploaded multiple rows) or single row (if manual)
         st.subheader("📊 SHAP Summary Plot")
