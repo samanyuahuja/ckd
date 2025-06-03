@@ -72,6 +72,7 @@ if use_manual_entry:
         'rbcc': 4.5, 'htn': 'no', 'dm': 'no', 'appet': 'good', 'pe': 'no' # Add 'pe'
     }
     # Add placeholders for derived features; they will be calculated later
+    default_values['ba'] = 'notpresent'
     default_values['bun_sc_ratio'] = default_values['bu'] / default_values['sc'] if default_values['sc'] != 0 else 0
     default_values['high_creatinine'] = 1 if default_values['sc'] > 1.2 else 0
     default_values['hemo_bu'] = default_values['hemo'] / (default_values['bu'] + 1) if default_values['bu'] >= 0 else 0
