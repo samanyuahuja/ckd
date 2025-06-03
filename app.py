@@ -301,39 +301,29 @@ if 'X_input' in locals() and not X_input.empty:
         explainer = shap.TreeExplainer(model)
         shap_values_full = explainer.shap_values(X_scaled)
     
-        # For instance index
-        idx = instance_to_explain_idx
+        idx = instance_to_explain_idx  # the instance index you want to explain
     
         if isinstance(explainer.expected_value, list):
             # Multi-class output
-            expected_value = explainer.expected_value[1]  # class 1 baseline
+            expected_value = explainer.expected_value[1]  # baseline for class 1
             shap_values_for_instance = shap_values_full[1][idx]
+            shap_values_class1_full = shap_values_full[1]
         else:
             # Single output
             expected_value = explainer.expected_value
             shap_values_for_instance = shap_values_full[idx]
+            shap_values_class1_full = shap_values_full
     
-        shap_html = shap.plots.force(
-            expected_value, 
-            shap_values_for_instance, 
-            X_input_single_df.iloc[idx],  # Pass one row as series or dataframe
-            matplotlib=False
-        )
-        components.html(shap_html.html(), height=300)
-    
-    except Exception as e:
-        st.error(f"Error generating SHAP plots: {e}")
-    
-        # Use correct variables for the instance you want to explain
-        # E.g. if instance_to_explain_idx and X_input_single_df are defined:
+        # SHAP Force Plot for the selected instance
         shap_html = shap.plots.force(
             expected_value,
-            shap_values_class1_full[instance_to_explain_idx],
-            X_input_single_df,
+            shap_values_for_instance,
+            X_input_single_df.iloc[idx],  # pass a single row as pandas Series or DataFrame
             matplotlib=False
         )
         components.html(shap_html.html(), height=300)
     
+        # SHAP Summary Plot for the whole dataset
         st.subheader("📊 SHAP Summary Plot")
         fig_summary, ax = plt.subplots(figsize=(10, 6))
         shap.summary_plot(shap_values_class1_full, X_input, plot_type="bar", show=False)
