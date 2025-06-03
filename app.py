@@ -3,8 +3,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import shap
-shap.initjs()
+
 import lime
 import lime.lime_tabular
 import matplotlib.pyplot as plt
@@ -16,6 +15,8 @@ from sklearn.inspection import PartialDependenceDisplay
 import streamlit.components.v1 as components
 from io import StringIO
 import os # Import the os module
+import shap
+shap.initjs()
 
 # Load model and scaler
 try:
@@ -300,11 +301,15 @@ if 'X_input' in locals() and not X_input.empty:
     # This is important because shap_values should correspond to X_scaled
     try:
         explainer = shap.TreeExplainer(model)
-        # Calculate SHAP values for the *entire* input dataset (might be one row or many)
         shap_values_full = explainer.shap_values(X_scaled)
-        # Select SHAP values for class 1 (CKD)
         shap_values_class1_full = shap_values_full[1] if isinstance(shap_values_full, list) else shap_values_full
         expected_value = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
+    
+        shap_html = shap.force_plot(expected_value, shap_vals_class1_single, X_input_single_df, matplotlib=False)
+        components.html(shap_html.html(), height=300)
+    
+    except Exception as e:
+        st.error(f"Error generating SHAP plots: {e}")
 
         # Force plot for the selected instance
         # Force plot for the selected instance
