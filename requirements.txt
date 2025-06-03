@@ -5,5 +5,4 @@ matplotlib==3.8.4
 streamlit==1.35.0
 shap==0.45.0
 lime==0.2.0.1
-pdpbox==0.2.1
-streamlit-shap==0.0.5
+# Removed pdpbox and streamlit-shap for compatibility
