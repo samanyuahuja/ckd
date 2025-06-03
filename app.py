@@ -276,8 +276,8 @@ if 'X_input' in locals() and not X_input.empty:
     try:
         prediction = model.predict(X_scaled)
         proba = model.predict_proba(X_scaled)[:, 1]
-        shap_values = explainer.shap_values(X_scaled_single)
-        shap.summary_plot(shap_values, X_scaled_single, feature_names=final_features)
+        shap_values = explainer.shap_values(X_scaled)
+        shap.summary_plot(shap_values, X_scaled, feature_names=final_features)
        
 
         st.subheader("Prediction")
@@ -324,8 +324,8 @@ if 'X_input' in locals() and not X_input.empty:
     features_single = X_input[final_features].iloc[0]
     
     explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(X_scaled_single)
-    shap.summary_plot(shap_values, X_scaled_single, feature_names=final_features)    
+    shap_values = explainer.shap_values(X_single)
+    shap.summary_plot(shap_values, X_single, feature_names=final_features)    
     # Log shape
     st.write(f"shap_values shape: {np.array(shap_values).shape}")
     
