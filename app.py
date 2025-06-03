@@ -264,47 +264,185 @@ if 'X_input' in locals() and not X_input.empty:
 
     # Scale the input data
     # Scale input
-    X_scaled = scaler.transform(X_input)
-    
-    # Predict
-    prediction = model.predict(X_scaled)[0]
-    prediction_proba = model.predict_proba(X_scaled)[0][1]
-    
-    st.subheader("Prediction")
-    st.write(f"Predicted class: {'CKD' if prediction == 1 else 'Not CKD'}")
-    st.write(f"Prediction probability: {prediction_proba:.2f}")
-    
-    # ------------------- SHAP -------------------
-    st.subheader("SHAP Explanation")
-    shap_values = explainer.shap_values(X_input)
-    st_shap(shap.force_plot(explainer.expected_value[1], shap_values[1], X_input), height=300)
-    
-    # ------------------- LIME -------------------
-    st.subheader("LIME Explanation")
-    lime_explainer = lime.lime_tabular.LimeTabularExplainer(
-        training_data=load_training_data().values,
-        feature_names=final_features,
-        class_names=["Not CKD", "CKD"],
-        mode="classification"
-    )
-    
-    lime_exp = lime_explainer.explain_instance(X_input.values[0], model.predict_proba, num_features=10)
-    
-    fig = lime_exp.as_pyplot_figure()
-    fig.tight_layout()
-    st.pyplot(fig)
-    
-    # ------------------- Partial Dependence Plots -------------------
-    st.subheader("Partial Dependence Plots")
-    
-    features_to_plot = ['age', 'sg', 'sc', 'hemo']  # you can adjust this list
-    fig, axs = plt.subplots(nrows=1, ncols=len(features_to_plot), figsize=(4 * len(features_to_plot), 4))
-    
-    if len(features_to_plot) == 1:
-        axs = [axs]
-    
-    display = PartialDependenceDisplay.from_estimator(
-        model, load_training_data(), features=features_to_plot, ax=axs
-    )
-    st.pyplot(fig)
+    try:
+        X_scaled = scaler.transform(X_input)
+        st.write("Scaled Data Preview:", X_scaled[:5]) # Show preview of scaled data
+    except Exception as e:
+        st.error(f"Error during data scaling: {e}")
+        st.stop()
 
+
+    # Make prediction
+    try:
+        prediction = model.predict(X_scaled)
+        proba = model.predict_proba(X_scaled)[:, 1]
+        shap_values = explainer.shap_values(X_scaled)
+
+        st.subheader("Prediction")
+        # Handle multiple predictions if a CSV was uploaded
+        if X_input.shape[0] > 1:
+            st.write("Predictions:", prediction.tolist())
+            st.write("Probabilities of CKD:", [round(p, 3) for p in proba.tolist()])
+            # For explanations, might want to pick one row or add a selector
+            # For simplicity, explain the first row for now
+            instance_to_explain_idx = 0
+            st.write(f"\nShowing explanations for the first instance (Row {instance_to_explain_idx})")
+            X_scaled_single = X_scaled[instance_to_explain_idx].reshape(1, -1)
+            X_input_single_df = X_input.iloc[[instance_to_explain_idx]]
+            prediction_single = prediction[instance_to_explain_idx]
+            expected_value_single = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
+            shap_vals_class1_single = shap_values[1][instance_to_explain_idx] if isinstance(shap_values, list) else shap_values[instance_to_explain_idx]
+
+
+        else:
+            # Single prediction from manual input
+            st.write("CKD Likelihood (1 = CKD likely, 0 = CKD unlikely):", int(prediction[0]))
+            st.write("Probability of CKD:", round(proba[0], 3))
+            instance_to_explain_idx = 0 # Only one instance
+            X_scaled_single = X_scaled
+            X_input_single_df = X_input
+            prediction_single = prediction[0]
+            expected_value_single = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
+            shap_vals_class1_single = shap_values[1][0] if isinstance(shap_values, list) else shap_values[0]
+
+
+    except Exception as e:
+        st.error(f"Error during prediction: {e}")
+        st.stop()
+
+
+    # SHAP Explanation (for the single instance selected or the first instance)
+      # Install via requirements.txt
+    
+    # SHAP Explanation
+    st.subheader("SHAP Explanation")
+
+    # Get single input
+    X_single = X_scaled[0:1]
+    features_single = X_input[final_features].iloc[0]
+    
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(X_single)
+    
+    # Log shape
+    st.write(f"shap_values shape: {np.array(shap_values).shape}")
+    
+    # Extract class 1 SHAP values
+    shap_vals_class1 = shap_values[0, :, 1]  # (23,)
+    
+    # Expected value
+    expected_val = explainer.expected_value[1] if isinstance(explainer.expected_value, (list, np.ndarray)) else explainer.expected_value
+    
+    # Create force plot
+    force_plot = shap.force_plot(
+        base_value=expected_val,
+        shap_values=shap_vals_class1,
+        features=features_single,
+        matplotlib=False,
+        show=False
+    )
+    
+    # Display in Streamlit
+    shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
+    st.subheader("SHAP Force Plot")
+    html(shap_html, height=300)
+    
+    # Summary Plot
+    st.subheader("SHAP Summary Plot")
+    fig_summary, ax_summary = plt.subplots(figsize=(10, 6))
+    shap.summary_plot(shap_vals_class1.reshape(1, -1), features_single.to_frame().T, plot_type="bar", show=False)
+    st.pyplot(fig_summary)
+        
+  
+
+
+    # LIME
+    
+    
+    
+   
+    
+    # Assume these are defined in your app somewhere:
+    # model: your trained sklearn-compatible model
+    # X_scaled: numpy array of current input data, scaled (shape: n_samples x n_features)
+    # final_features: list of feature names (length = n_features)
+    # instance_to_explain_idx: int, index of instance to explain (e.g., 0 for first row)
+    # X_scaled_single: numpy array containing single instance scaled (shape: 1 x n_features)
+    # X_input_single_df: pandas DataFrame for the single instance (shape: 1 x n_features)
+    
+   
+
+   
+    
+    # Assume model, X_scaled, final_features, X_scaled_single, instance_to_explain_idx are pre-defined
+    
+    # --------------------- LIME ---------------------
+    st.subheader(f"🟢 LIME Explanation (Instance {instance_to_explain_idx})")
+    try:
+        # Handle missing training data
+        if 'X_train_scaled' in globals():
+            lime_background = X_train_scaled
+            st.info("✅ Using X_train_scaled as LIME background.")
+        else:
+            lime_background = np.repeat(X_scaled_single, 100, axis=0)
+            st.warning("⚠️ No X_train_scaled found; duplicated X_scaled_single 100 times for LIME background.")
+        
+        st.write("LIME background data shape:", lime_background.shape)
+    
+        lime_explainer = lime.lime_tabular.LimeTabularExplainer(
+            training_data=lime_background,
+            feature_names=final_features,
+            class_names=['No CKD', 'CKD'],
+            mode='classification'
+        )
+    
+        lime_exp = lime_explainer.explain_instance(
+            X_scaled_single[0], model.predict_proba, num_features=len(final_features)
+        )
+    
+        fig_lime = lime_exp.as_pyplot_figure()
+        st.pyplot(fig_lime)
+    
+    except Exception as e:
+        st.error(f"❌ Error generating LIME plot: {e}")
+    
+    # --------------------- PDP ---------------------
+    st.subheader("📐 Partial Dependence Plot (PDP)")
+
+    # Let user choose which feature to visualize
+    feature_to_plot = st.selectbox("🔍 Select feature for PDP", final_features)
+    
+    try:
+        feature_index = final_features.index(feature_to_plot)
+    
+        # Choose data source for PDP
+        if 'X_train_scaled' in globals() and X_train_scaled.shape[0] >= 200:
+            pdp_data = X_train_scaled[:200]
+            st.info("✅ Using first 200 rows from X_train_scaled as background for PDP.")
+        else:
+            # Duplicate and add noise for synthetic variation
+            pdp_data = np.repeat(X_scaled_single, 200, axis=0)
+            noise = np.random.normal(0, 0.01, pdp_data.shape)  # Small Gaussian noise
+            pdp_data += noise
+            st.warning("⚠️ No X_train_scaled found; using X_scaled_single with added noise as PDP background.")
+    
+        # Debug output
+        st.text(f"PDP data shape: {pdp_data.shape}")
+        st.text(f"Generating PDP for feature '{feature_to_plot}' at index {feature_index}")
+    
+        # Convert to DataFrame with feature names for compatibility
+        pdp_df = pd.DataFrame(pdp_data, columns=final_features)
+    
+        # Plot
+        fig_pdp, ax_pdp = plt.subplots(figsize=(8, 5))
+        PartialDependenceDisplay.from_estimator(
+            model,
+            pdp_df,
+            features=[feature_index],
+            feature_names=final_features,
+            ax=ax_pdp
+        )
+        st.pyplot(fig_pdp)
+    
+    except Exception as e:
+        st.error(f"❌ Error generating PDP plot: {e}")
