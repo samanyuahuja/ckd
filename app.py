@@ -17,6 +17,7 @@ from io import StringIO
 import os # Import the os module
 import shap
 from streamlit_shap import st_shap
+from streamlit.components.v1 import html
 
 # Load model and scaler
 try:
@@ -299,23 +300,41 @@ if 'X_input' in locals() and not X_input.empty:
     
     # SHAP Explanation
     st.subheader("SHAP Explanation")
-    
-    # Only take the first input sample (one row)
+
+    # Get single input
     X_single = X_scaled[0:1]
-    features_single = X_input[final_features].iloc[0:1]
+    features_single = X_input[final_features].iloc[0]
     
-    # TreeExplainer
     explainer = shap.TreeExplainer(model)
-    shap_values = explainer(X_single)
+    shap_values = explainer.shap_values(X_single)
     
-    # SHAP Force Plot
+    # Log shape
+    st.write(f"shap_values shape: {np.array(shap_values).shape}")
+    
+    # Extract class 1 SHAP values
+    shap_vals_class1 = shap_values[0, :, 1]  # (23,)
+    
+    # Expected value
+    expected_val = explainer.expected_value[1] if isinstance(explainer.expected_value, (list, np.ndarray)) else explainer.expected_value
+    
+    # Create force plot
+    force_plot = shap.force_plot(
+        base_value=expected_val,
+        shap_values=shap_vals_class1,
+        features=features_single,
+        matplotlib=False,
+        show=False
+    )
+    
+    # Display in Streamlit
+    shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
     st.subheader("SHAP Force Plot")
-    st_shap(shap.plots.force(shap_values[0]), height=300)
+    html(shap_html, height=300)
     
-    # SHAP Summary Bar Plot
+    # Summary Plot
     st.subheader("SHAP Summary Plot")
     fig_summary, ax_summary = plt.subplots(figsize=(10, 6))
-    shap.plots.bar(shap_values[0], show=False)
+    shap.summary_plot(shap_vals_class1.reshape(1, -1), features_single.to_frame().T, plot_type="bar", show=False)
     st.pyplot(fig_summary)
         
   
