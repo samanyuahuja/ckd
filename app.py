@@ -277,9 +277,7 @@ if 'X_input' in locals() and not X_input.empty:
         prediction = model.predict(X_scaled)
         proba = model.predict_proba(X_scaled)[:, 1]
         shap_values = explainer.shap_values(X_scaled)
-        exp = explainer.explain_instance(input_data[0], model.predict_proba, num_features=5)
-        fig = exp.as_pyplot_figure()
-        st.pyplot(fig)
+       
 
         st.subheader("Prediction")
         # Handle multiple predictions if a CSV was uploaded
@@ -380,35 +378,28 @@ if 'X_input' in locals() and not X_input.empty:
     # Assume model, X_scaled, final_features, X_scaled_single, instance_to_explain_idx are pre-defined
     
     # --------------------- LIME ---------------------
-    st.subheader(f"🟢 LIME Explanation (Instance {instance_to_explain_idx})")
-    try:
-        # Handle missing training data
-        if 'X_train_scaled' in globals():
-            lime_background = X_train_scaled
-            st.info("✅ Using X_train_scaled as LIME background.")
-        else:
-            lime_background = np.repeat(X_scaled_single, 100, axis=0)
-            st.warning("⚠️ No X_train_scaled found; duplicated X_scaled_single 100 times for LIME background.")
+
+    
+    # Initialize the LIME explainer
+    explainer = lime.lime_tabular.LimeTabularExplainer(
+        training_data=np.array(X_train_scaled),
+        feature_names=final_features,
+        class_names=["No CKD", "CKD"],
+        mode='classification'
+    )
+    
+    # Explain a single prediction (first row)
+    explanation = explainer.explain_instance(
+        data_row=X_scaled_single[0],
+        predict_fn=model.predict_proba,
+        num_features=10  # Top 10 features to display
+    )
+    
+    # Plot the explanation
+    st.subheader("🧠 LIME Explanation")
+    fig_lime = explanation.as_pyplot_figure(label=1)
+    st.pyplot(fig_lime)
         
-        st.write("LIME background data shape:", lime_background.shape)
-    
-        lime_explainer = lime.lime_tabular.LimeTabularExplainer(
-            training_data=lime_background,
-            feature_names=final_features,
-            class_names=['No CKD', 'CKD'],
-            mode='classification'
-        )
-    
-        lime_exp = lime_explainer.explain_instance(
-            X_scaled_single[0], model.predict_proba, num_features=len(final_features)
-        )
-    
-        fig_lime = lime_exp.as_pyplot_figure()
-        st.pyplot(fig_lime)
-    
-    except Exception as e:
-        st.error(f"❌ Error generating LIME plot: {e}")
-    
     # --------------------- PDP ---------------------
     st.subheader("📐 Partial Dependence Plot (PDP)")
 
