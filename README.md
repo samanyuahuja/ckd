@@ -1,8 +1,8 @@
-# CKD Predictor App 🔬
+# CKD Predictor App 
 
 A Streamlit-powered machine learning application that predicts Chronic Kidney Disease using patient medical data. Includes explainable AI add-ons like SHAP, LIME, and PDP to make predictions transparent and understandable.
 
-## 🧠 Features
+## Features
 
 - Random Forest Classifier for CKD prediction
 - SHAP plots for global & local explanation
@@ -12,7 +12,7 @@ A Streamlit-powered machine learning application that predicts Chronic Kidney Di
 - Upload custom data for prediction
 - Clean UI with expandable explanations
 
-## 🚀 Technologies Used
+## Technologies Used
 
 - Python
 - Streamlit
@@ -21,7 +21,7 @@ A Streamlit-powered machine learning application that predicts Chronic Kidney Di
 - LIME
 - Pandas, NumPy, Matplotlib
 
-## 📦 How to Run Locally
+## How to Run Locally
 
 ```bash
 pip install -r requirements.txt
