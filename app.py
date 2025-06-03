@@ -432,6 +432,26 @@ if 'X_input' in locals() and not X_input.empty:
     
             # Debug
             st.text(f"🔍 PDP for feature '{feature}' (index {feature_index})")
+            # Debug manual PDP for feature
+            feature = 'hemo'  # Change to any feature you want to test
+            feature_index = final_features.index(feature)
+            
+            try:
+                from sklearn.inspection import partial_dependence
+            
+                # Run manual PDP
+                pdp_result = partial_dependence(model, pdp_df, [feature_index])
+            
+                # Plot manually
+                fig_manual, ax_manual = plt.subplots()
+                ax_manual.plot(pdp_result['values'][0], pdp_result['average'][0])
+                ax_manual.set_xlabel(feature)
+                ax_manual.set_ylabel("Partial Dependence")
+                ax_manual.set_title(f"Manual PDP for {feature}")
+                st.pyplot(fig_manual)
+            
+            except Exception as e:
+                st.error(f"❌ Manual PDP failed: {e}")
     
             # Plot PDP
             fig_pdp, ax_pdp = plt.subplots(figsize=(8, 5))
