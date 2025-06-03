@@ -22,7 +22,7 @@ import warnings
 warnings.filterwarnings("ignore")
 @st.cache_resource
 def load_model():
-    return joblib.load("my_model.pkl")
+    return joblib.load("model.pkl")
 
 model = load_model()
 
