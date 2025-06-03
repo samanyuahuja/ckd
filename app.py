@@ -21,6 +21,9 @@ try:
     model = joblib.load("model.pkl")
     scaler = joblib.load("scaler.pkl")
     st.success("Model and Scaler loaded successfully.")
+
+    # Define SHAP explainer globally after model is loaded
+    explainer = shap.TreeExplainer(model)
 except FileNotFoundError:
     st.error("Error: Model or scaler files not found.")
     st.info("Please ensure 'model.pkl' and 'scaler.pkl' are in the same directory as this script.")
