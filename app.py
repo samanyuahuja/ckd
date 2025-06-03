@@ -300,8 +300,16 @@ if 'X_input' in locals() and not X_input.empty:
     try:
         explainer = shap.TreeExplainer(model)
         shap_values_full = explainer.shap_values(X_scaled)
-        shap_values_class1_full = shap_values_full[1] if isinstance(shap_values_full, list) else shap_values_full
-        expected_value = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
+    
+        if isinstance(explainer.expected_value, list):
+            expected_value = explainer.expected_value[1]
+            shap_values_for_instance = shap_values_full[1][instance_to_explain_idx]
+        else:
+            expected_value = explainer.expected_value
+            shap_values_for_instance = shap_values_full[instance_to_explain_idx]
+    
+        shap_html = shap.plots.force(expected_value, shap_values_for_instance, X_input_single_df, matplotlib=False)
+        components.html(shap_html.html(), height=300)
     
         # Use correct variables for the instance you want to explain
         # E.g. if instance_to_explain_idx and X_input_single_df are defined:
