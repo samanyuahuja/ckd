@@ -1,5 +1,4 @@
 # Step 1: Install necessary libraries
-!pip install streamlit shap lime joblib pandas numpy scikit-learn matplotlib seaborn
 
 import streamlit as st
 import pandas as pd
