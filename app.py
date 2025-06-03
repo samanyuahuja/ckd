@@ -16,7 +16,7 @@ import streamlit.components.v1 as components
 from io import StringIO
 import os # Import the os module
 import shap
-shap.initjs()
+from streamlit_shap import st_shap
 
 # Load model and scaler
 try:
@@ -295,50 +295,30 @@ if 'X_input' in locals() and not X_input.empty:
 
 
     # SHAP Explanation (for the single instance selected or the first instance)
-    st.subheader("📈 SHAP Explanation")
-
-    try:
-        explainer = shap.TreeExplainer(model)
-        shap_values_full = explainer.shap_values(X_scaled)
+      # Install via requirements.txt
     
-        idx = instance_to_explain_idx
+    # SHAP Explanation
+    st.subheader("SHAP Explanation")
     
-        st.write(f"explainer.expected_value = {explainer.expected_value}")
+    # Only take the first input sample (one row)
+    X_single = X_scaled[0:1]
+    features_single = X_input[final_features].iloc[0:1]
     
-        if isinstance(explainer.expected_value, (list, np.ndarray)):
-            expected_value = explainer.expected_value[1]
-            shap_values_for_instance = shap_values_full[1][idx]
-            shap_values_class1_full = shap_values_full[1]
-        else:
-            expected_value = explainer.expected_value
-            shap_values_for_instance = shap_values_full[idx]
-            shap_values_class1_full = shap_values_full
+    # TreeExplainer
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer(X_single)
     
-        idx = instance_to_explain_idx  # your selected instance index
+    # SHAP Force Plot
+    st.subheader("SHAP Force Plot")
+    st_shap(shap.plots.force(shap_values[0]), height=300)
+    
+    # SHAP Summary Bar Plot
+    st.subheader("SHAP Summary Plot")
+    fig_summary, ax_summary = plt.subplots(figsize=(10, 6))
+    shap.plots.bar(shap_values[0], show=False)
+    st.pyplot(fig_summary)
         
-        explainer = shap.TreeExplainer(model)
-        shap_values_full = explainer.shap_values(X_scaled)
-        
-        expected_value = explainer.expected_value[1]  # class 1 base value
-        shap_values_for_instance = shap_values_full[1][idx]  # class 1 SHAP values for the instance
-        features_for_instance = X_input_single_df.iloc[idx]
-        
-        shap_html = shap.plots.force(
-            expected_value,
-            shap_values_for_instance,
-            features_for_instance,
-            matplotlib=False
-        )
-        
-        components.html(shap_html.html(), height=300)
-    
-        st.subheader("📊 SHAP Summary Plot")
-        fig_summary, ax = plt.subplots(figsize=(10, 6))
-        shap.summary_plot(shap_values_class1_full, X_input, plot_type="bar", show=False)
-        st.pyplot(fig_summary)
-    
-    except Exception as e:
-        st.error(f"Error generating SHAP plots: {e}")
+  
 
 
     # LIME Explanation (for the single instance selected or the first instance)
