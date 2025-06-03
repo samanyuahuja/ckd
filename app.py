@@ -325,7 +325,7 @@ if 'X_input' in locals() and not X_input.empty:
     
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_single)
-    shap.summary_plot(shap_values, X_single, feature_names=final_features)    
+       
     # Log shape
     st.write(f"shap_values shape: {np.array(shap_values).shape}")
     
