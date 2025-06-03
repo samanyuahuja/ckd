@@ -24,12 +24,15 @@ warnings.filterwarnings("ignore")
 def load_model():
     return joblib.load("model.pkl")
 
-model = load_model()
 
+@st.cache_resource
+def load_scaler():
+    return joblib.load("scaler.pkl") 
 # Optional: cache training data
 @st.cache_data
 def load_training_data():
     return pd.read_csv("X_train_scaled.csv")
+
 
 # Load model and scaler
 try:
@@ -374,28 +377,28 @@ if 'X_input' in locals() and not X_input.empty:
     
     # --------------------- LIME ---------------------
     st.subheader(f"🟢 LIME Explanation (Instance {instance_to_explain_idx})")
-    
     try:
-        if 'X_train_scaled' in locals():
-            background_data_for_lime = X_train_scaled
-            st.write(f"✅ Using X_train_scaled with shape: {background_data_for_lime.shape} for LIME.")
+        # Handle missing training data
+        if 'X_train_scaled' in globals():
+            lime_background = X_train_scaled
+            st.info("✅ Using X_train_scaled as LIME background.")
         else:
-            background_data_for_lime = np.tile(X_scaled_single, (100, 1))
-            st.write("⚠️ No X_train_scaled found; duplicated X_scaled_single 100 times for LIME background.")
-            st.write(f"LIME background data shape: {background_data_for_lime.shape}")
+            lime_background = np.repeat(X_scaled_single, 100, axis=0)
+            st.warning("⚠️ No X_train_scaled found; duplicated X_scaled_single 100 times for LIME background.")
+        
+        st.write("LIME background data shape:", lime_background.shape)
     
         lime_explainer = lime.lime_tabular.LimeTabularExplainer(
-            training_data=background_data_for_lime,
+            training_data=lime_background,
             feature_names=final_features,
             class_names=['No CKD', 'CKD'],
             mode='classification'
         )
     
         lime_exp = lime_explainer.explain_instance(
-            X_scaled_single[0],
-            model.predict_proba,
-            num_features=10
+            X_scaled_single[0], model.predict_proba, num_features=len(final_features)
         )
+    
         fig_lime = lime_exp.as_pyplot_figure()
         st.pyplot(fig_lime)
     
@@ -404,32 +407,30 @@ if 'X_input' in locals() and not X_input.empty:
     
     # --------------------- PDP ---------------------
     st.subheader("📐 Partial Dependence Plot (PDP)")
-    
+
     try:
-        feature_to_plot = st.selectbox("Select feature for PDP", final_features, key="pdp_feature")
-        
-        if feature_to_plot:
-            if 'X_train_scaled' in locals():
-                pdp_data = X_train_scaled
-                st.write(f"✅ Using X_train_scaled with shape: {pdp_data.shape} for PDP.")
-            else:
-                pdp_data = np.tile(X_scaled_single, (200, 1))
-                st.write("⚠️ No X_train_scaled found; duplicated X_scaled_single 200 times for PDP.")
-                st.write(f"PDP data shape: {pdp_data.shape}")
+        feature_to_plot = st.selectbox("🔍 Select feature for PDP", final_features)
+        feature_index = final_features.index(feature_to_plot)
     
-            pdp_data_df = pd.DataFrame(pdp_data, columns=final_features)
-            feature_index = final_features.index(feature_to_plot)
-            st.write(f"Generating PDP for feature '{feature_to_plot}' at index {feature_index}")
+        # Handle missing training data
+        if 'X_train_scaled' in globals():
+            pdp_data = X_train_scaled[:200]
+            st.info("✅ Using X_train_scaled as PDP background.")
+        else:
+            pdp_data = np.repeat(X_scaled_single, 200, axis=0)
+            st.warning("⚠️ No X_train_scaled found; duplicated X_scaled_single 200 times for PDP.")
     
-            fig_pdp, ax_pdp = plt.subplots(figsize=(8, 6))
-            PartialDependenceDisplay.from_estimator(
-                model,
-                pdp_data_df,
-                features=[feature_index],
-                ax=ax_pdp,
-                feature_names=final_features
-            )
-            st.pyplot(fig_pdp)
+        st.write("PDP data shape:", pdp_data.shape)
+        st.write(f"Generating PDP for feature '{feature_to_plot}' at index {feature_index}")
+    
+        pdp_df = pd.DataFrame(pdp_data, columns=final_features)
+        fig_pdp, ax_pdp = plt.subplots(figsize=(8, 5))
+    
+        PartialDependenceDisplay.from_estimator(
+            model, pdp_df, features=[feature_index],
+            feature_names=final_features, ax=ax_pdp
+        )
+        st.pyplot(fig_pdp)
     
     except Exception as e:
         st.error(f"❌ Error generating PDP plot: {e}")
