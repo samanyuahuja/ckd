@@ -344,32 +344,43 @@ if 'X_input' in locals() and not X_input.empty:
     
     
     
-    st.subheader("🟢 LIME Explanation (Instance " + str(instance_to_explain_idx) + ")")
+   
+    
+    # Assume these are defined in your app somewhere:
+    # model: your trained sklearn-compatible model
+    # X_scaled: numpy array of current input data, scaled (shape: n_samples x n_features)
+    # final_features: list of feature names (length = n_features)
+    # instance_to_explain_idx: int, index of instance to explain (e.g., 0 for first row)
+    # X_scaled_single: numpy array containing single instance scaled (shape: 1 x n_features)
+    # X_input_single_df: pandas DataFrame for the single instance (shape: 1 x n_features)
+    
+    st.subheader(f"🟢 LIME Explanation (Instance {instance_to_explain_idx})")
     
     try:
-        # Determine background data for LIME explainer
-        if 'X_train_scaled' not in locals() and X_scaled.shape[0] < 10:
-            st.warning("No X_train_scaled found; using a duplicated sample of current scaled input data for LIME background.")
-            # Duplicate the single instance 100 times as a temporary hack for background data
-            background_data_for_lime = np.repeat(X_scaled, repeats=100, axis=0)
-            st.write(f"LIME background data shape after duplication: {background_data_for_lime.shape}")
-        elif 'X_train_scaled' in locals():
-            background_data_for_lime = X_train_scaled  # Use real training data if available
-            st.write(f"LIME background data shape (X_train_scaled): {background_data_for_lime.shape}")
+        # Prepare background data for LIME
+        if 'X_train_scaled' in locals():
+            background_data_for_lime = X_train_scaled
+            st.write(f"Using X_train_scaled with shape: {background_data_for_lime.shape} as LIME background.")
         else:
-            # If no X_train_scaled but have multiple samples in X_scaled, use a sample of it
-            background_data_for_lime = X_scaled[:min(100, X_scaled.shape[0])]
-            st.write(f"LIME background data shape (sample from X_scaled): {background_data_for_lime.shape}")
+            # Duplicate current single instance to have at least 100 samples for LIME background
+            dup_count = 100
+            background_data_for_lime = np.tile(X_scaled_single, (dup_count, 1))
+            st.write(f"No X_train_scaled found; duplicated X_scaled_single {dup_count} times for LIME background.")
+            st.write(f"LIME background data shape: {background_data_for_lime.shape}")
     
-        lime_explainer = lime.lime_tabular.LimeTabularExplainer(
+        lime_explainer = lime_tabular.LimeTabularExplainer(
             training_data=background_data_for_lime,
             feature_names=final_features,
             class_names=['No CKD', 'CKD'],
             mode='classification'
         )
     
-        # Explain the single instance's scaled data point
-        lime_exp = lime_explainer.explain_instance(X_scaled_single[0], model.predict_proba, num_features=10)
+        # Explain the single instance
+        lime_exp = lime_explainer.explain_instance(
+            X_scaled_single[0],  # single row as 1d array
+            model.predict_proba,
+            num_features=10
+        )
         fig_lime = lime_exp.as_pyplot_figure()
         st.pyplot(fig_lime)
     
@@ -377,36 +388,37 @@ if 'X_input' in locals() and not X_input.empty:
         st.error(f"Error generating LIME plot: {e}")
     
     
+    # Partial Dependence Plot (PDP)
     st.subheader("📐 Partial Dependence Plot (PDP)")
     
     try:
         feature_to_plot = st.selectbox("Select feature for PDP", final_features)
         if feature_to_plot:
             if 'X_train_scaled' in locals():
-                pdp_data = X_train_scaled[:min(200, X_train_scaled.shape[0])]
-                st.write(f"PDP data shape (X_train_scaled): {pdp_data.shape}")
+                pdp_data = X_train_scaled
+                st.write(f"Using X_train_scaled with shape: {pdp_data.shape} for PDP.")
             else:
-                if X_scaled.shape[0] < 10:
-                    st.warning("No X_train_scaled found; duplicating current input data for PDP.")
-                    pdp_data = np.repeat(X_scaled, repeats=200, axis=0)
-                else:
-                    pdp_data = X_scaled[:min(200, X_scaled.shape[0])]
+                # Duplicate current single instance to have enough samples for PDP
+                dup_count_pdp = 200
+                pdp_data = np.tile(X_scaled_single, (dup_count_pdp, 1))
+                st.write(f"No X_train_scaled found; duplicated X_scaled_single {dup_count_pdp} times for PDP.")
                 st.write(f"PDP data shape: {pdp_data.shape}")
     
+            # Convert to DataFrame for PDP function
             pdp_data_df = pd.DataFrame(pdp_data, columns=final_features)
     
-            st.write(f"Generating PDP for feature '{feature_to_plot}' at index {final_features.index(feature_to_plot)}")
+            feature_index = final_features.index(feature_to_plot)
+            st.write(f"Generating PDP for feature '{feature_to_plot}' at index {feature_index}")
     
             fig_pdp, ax_pdp = plt.subplots(figsize=(8, 6))
             PartialDependenceDisplay.from_estimator(
-                model, pdp_data_df, features=[final_features.index(feature_to_plot)],
-                feature_names=final_features, ax=ax_pdp
+                model,
+                pdp_data_df,
+                features=[feature_index],
+                ax=ax_pdp,
+                feature_names=final_features
             )
             st.pyplot(fig_pdp)
     
     except Exception as e:
         st.error(f"Error generating PDP plot: {e}")
-    
-    
-    else:
-        st.info("Enter values manually or upload a CSV to get predictions and explanations.")
