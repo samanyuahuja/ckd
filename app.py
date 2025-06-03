@@ -4,6 +4,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import shap
+shap.initjs()
 import lime
 import lime.lime_tabular
 import matplotlib.pyplot as plt
@@ -308,20 +309,26 @@ if 'X_input' in locals() and not X_input.empty:
         # Force plot for the selected instance
         # Force plot for the selected instance
         
-        st.subheader("SHAP Force Plot (Instance " + str(instance_to_explain_idx) + ")")
-
-# Generate force plot as a JS/HTML object
-        shap_html = shap.plots.force(
-            explainer.expected_value[1], 
-            shap_values[1][instance_to_explain_idx], 
-            X_input_single_df,
-            matplotlib=False
-        )
+         # <-- Add this once at the top of your script
         
-        # Display the force plot HTML in Streamlit
-        components.html(shap_html.html(), height=300)
+        # ... your code ...
         
-        st.pyplot(shap_plot)
+        try:
+            explainer = shap.TreeExplainer(model)
+            shap_values = explainer.shap_values(X_scaled)
+            
+            st.subheader("SHAP Force Plot (Instance " + str(instance_to_explain_idx) + ")")
+            
+            shap_html = shap.plots.force(
+                explainer.expected_value[1], 
+                shap_values[1][instance_to_explain_idx], 
+                X_input_single_df,
+                matplotlib=False
+            )
+            components.html(shap_html.html(), height=300)
+        
+        except Exception as e:
+            st.error(f"Error generating SHAP plots: {e}")
         # SHAP Summary plot for the whole dataset (if uploaded multiple rows) or single row (if manual)
         st.subheader("📊 SHAP Summary Plot")
         fig_summary, ax = plt.subplots(figsize=(10, 6)) # Added figure size
