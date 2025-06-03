@@ -19,7 +19,7 @@ A Streamlit-powered machine learning application that predicts Chronic Kidney Di
 - Scikit-learn
 - SHAP
 - LIME
-- Pandas, NumPy, Matplotlib
+- Pandas, NumPy, Matplotlib 
 
 ## How to Run Locally
 
