@@ -340,68 +340,83 @@ if 'X_input' in locals() and not X_input.empty:
   
 
 
-    # LIME Explanation (for the single instance selected or the first instance)
+    # LIME
+    
     st.subheader("🟢 LIME Explanation (Instance " + str(instance_to_explain_idx) + ")")
     try:
-        # LIME explainer needs training data that was scaled
-        # Ideally, use a representative sample of the *original* scaled training data
-        # For this example, we'll use the current scaled input data (X_scaled) as training_data for LIME,
-        # which is NOT ideal for production but works for demonstrating the fix.
-        # In production, load a small sample of your actual X_train_scaled here.
-        if 'X_train_scaled' not in locals() and X_scaled.shape[0] < 10:
-             st.warning("LIME explainer uses the current input data as background. For better results, provide representative training data.")
-             background_data_for_lime = X_scaled # Fallback for single instance
-        elif 'X_train_scaled' in locals():
-             background_data_for_lime = X_train_scaled # Use actual training data if available
+        # Prepare background data for LIME
+        if 'X_train_scaled' in locals():
+            background_data_for_lime = X_train_scaled
+            st.write(f"Using X_train_scaled as LIME background data with shape {background_data_for_lime.shape}")
         else:
-             # If no X_train_scaled, use a sample of current X_scaled if it's large enough
-             background_data_for_lime = X_scaled[:min(100, X_scaled.shape[0])] # Use up to 100 samples
-
+            # Use current input data if no training data available
+            background_data_for_lime = X_scaled[:min(100, X_scaled.shape[0])]
+            st.warning("No X_train_scaled found; using a sample of current scaled input data for LIME background.")
+            st.write(f"LIME background data shape: {background_data_for_lime.shape}")
+    
+        # Ensure background data is numpy array
+        background_data_for_lime = np.array(background_data_for_lime)
+    
         lime_explainer = lime.lime_tabular.LimeTabularExplainer(
-            training_data=background_data_for_lime, # Use appropriate background data
+            training_data=background_data_for_lime,
             feature_names=final_features,
             class_names=['No CKD', 'CKD'],
             mode='classification'
         )
-
-        # Explain the single instance's scaled data point
-        lime_exp = lime_explainer.explain_instance(X_scaled_single[0], model.predict_proba, num_features=10)
+    
+        # Prepare instance input for explanation
+        instance = np.array(X_scaled_single[0])
+        st.write(f"Original instance shape: {X_scaled_single[0].shape}")
+        if instance.ndim > 1:
+            instance = instance.flatten()
+            st.write(f"Flattened instance shape: {instance.shape}")
+    
+        # Check model predict_proba interface
+        st.write(f"Background data shape for predict_proba test: {background_data_for_lime.shape}")
+    
+        # Explain the instance
+        lime_exp = lime_explainer.explain_instance(
+            instance,
+            model.predict_proba,
+            num_features=10
+        )
         fig_lime = lime_exp.as_pyplot_figure()
         st.pyplot(fig_lime)
-
+    
     except Exception as e:
         st.error(f"Error generating LIME plot: {e}")
-
-
-    # Partial Dependence Plot
+    
+    # Partial Dependence Plot (PDP)
     st.subheader("📐 Partial Dependence Plot (PDP)")
     try:
         feature_to_plot = st.selectbox("Select feature for PDP", final_features)
         if feature_to_plot:
             fig_pdp, ax_pdp = plt.subplots()
-            # PDP requires a sample of the data the model was trained on.
-            # Using X_scaled (the current input) is only appropriate if it's large and representative.
-            # Ideally, use a small sample of X_train_scaled here.
-            # For demonstration, using X_scaled, but note this limitation.
+    
+            # Prepare data for PDP
             if 'X_train_scaled' in locals():
-                 pdp_data = X_train_scaled[:min(200, X_train_scaled.shape[0])] # Use up to 200 samples from train
-                 pdp_data_df = pd.DataFrame(pdp_data, columns=final_features) # Convert to DF for display function
+                pdp_data = X_train_scaled[:min(200, X_train_scaled.shape[0])]
+                st.write(f"Using X_train_scaled for PDP with shape {pdp_data.shape}")
             else:
-                 pdp_data = X_scaled[:min(200, X_scaled.shape[0])] # Fallback to current input if large enough
-                 pdp_data_df = pd.DataFrame(pdp_data, columns=final_features) # Convert to DF
-
+                pdp_data = X_scaled[:min(200, X_scaled.shape[0])]
+                st.warning("No X_train_scaled found; using a sample of current scaled input data for PDP.")
+                st.write(f"PDP data shape: {pdp_data.shape}")
+    
+            pdp_data_df = pd.DataFrame(pdp_data, columns=final_features)
+    
             if feature_to_plot in pdp_data_df.columns:
+                feature_idx = final_features.index(feature_to_plot)
+                st.write(f"Generating PDP for feature '{feature_to_plot}' at index {feature_idx}")
+    
                 PartialDependenceDisplay.from_estimator(
-                    model, pdp_data_df, features=[final_features.index(feature_to_plot)], ax=ax_pdp, feature_names=final_features
+                    model,
+                    pdp_data_df,
+                    features=[feature_idx],
+                    ax=ax_pdp
                 )
                 st.pyplot(fig_pdp)
             else:
-                st.warning(f"Feature '{feature_to_plot}' not found in the data used for PDP.")
-
+                st.warning(f"Feature '{feature_to_plot}' not found in PDP data columns.")
+    
     except Exception as e:
         st.error(f"Error generating PDP plot: {e}")
-
-
-else:
-    # This block executes if no file was uploaded and manual input wasn't yet submitted
-    st.info("Enter values manually or upload a CSV to get predictions and explanations.")
