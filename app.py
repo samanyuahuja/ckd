@@ -34,9 +34,9 @@ except FileNotFoundError:
 # Example: scaler features_in_ might be ['age', 'bp', ..., 'hemo_bu']
 # Example: model features_in_ might also be the same list.
 # This list should match the columns provided to the model.
-final_features = ['age' 'bp' 'sg' 'al' 'su' 'rbc' 'pc' 'pcc' 'bgr' 'bu' 'sc' 'sod' 'pot'
-                  'hemo' 'wbcc' 'rbcc' 'htn' 'dm' 'appet' 'pe' 'bun_sc_ratio'
-                  'high_creatinine' 'hemo_bu']# Example list - verify this from your training code
+final_features = ['age', 'bp', 'sg', 'al', 'su', 'rbc', 'pc', 'pcc', 'bgr', 'bu', 'sc', 'sod', 'pot',
+                  'hemo', 'wbcc', 'rbcc', 'htn', 'dm', 'appet', 'pe', 'bun_sc_ratio',
+                  'high_creatinine', 'hemo_bu']# Example list - verify this from your training code
 
 st.title("CKD Prediction App with Explainability")
 st.write("Upload your data below or manually enter values for prediction.")
