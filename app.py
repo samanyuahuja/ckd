@@ -277,6 +277,9 @@ if 'X_input' in locals() and not X_input.empty:
         prediction = model.predict(X_scaled)
         proba = model.predict_proba(X_scaled)[:, 1]
         shap_values = explainer.shap_values(X_scaled)
+        exp = explainer.explain_instance(input_data[0], model.predict_proba, num_features=5)
+        fig = exp.as_pyplot_figure()
+        st.pyplot(fig)
 
         st.subheader("Prediction")
         # Handle multiple predictions if a CSV was uploaded
@@ -292,7 +295,7 @@ if 'X_input' in locals() and not X_input.empty:
             prediction_single = prediction[instance_to_explain_idx]
             expected_value_single = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
             shap_vals_class1_single = shap_values[1][instance_to_explain_idx] if isinstance(shap_values, list) else shap_values[instance_to_explain_idx]
-
+            
 
         else:
             # Single prediction from manual input
@@ -417,7 +420,7 @@ if 'X_input' in locals() and not X_input.empty:
         pdp_data = X_train_scaled[:200]
         st.info("✅ Using first 200 rows from X_train_scaled as background for PDP.")
     else:
-        pdp_data = np.repeat(X_scaled_single, 200, axis=0)
+        pdp_data = X_train.iloc[:200]
         noise = np.random.normal(0, 0.01, pdp_data.shape)
         pdp_data += noise
         st.warning("⚠️ No X_train_scaled found; using X_scaled_single with added noise as PDP background.")
