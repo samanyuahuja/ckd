@@ -307,12 +307,14 @@ if 'X_input' in locals() and not X_input.empty:
         # Force plot for the selected instance
         # Force plot for the selected instance
         st.subheader("SHAP Force Plot (Instance " + str(instance_to_explain_idx) + ")")
-    
-    # Generate SHAP force plot using new syntax
-        shap_plot = shap.plots.force(expected_value, shap_vals_class1_single, X_input_single_df)        
-        # Embed it in Streamlit using HTML
-        st_shap = st.pyplot(shap_plot)
 
+        shap_plot = shap.plots.force(
+            explainer.expected_value[1], 
+            shap_values[1][instance_to_explain_idx], 
+            X_input_single_df
+        )
+        
+        st.pyplot(shap_plot)
         # SHAP Summary plot for the whole dataset (if uploaded multiple rows) or single row (if manual)
         st.subheader("📊 SHAP Summary Plot")
         fig_summary, ax = plt.subplots(figsize=(10, 6)) # Added figure size
