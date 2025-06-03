@@ -409,40 +409,40 @@ if 'X_input' in locals() and not X_input.empty:
     # --------------------- PDP ---------------------
     st.subheader("📐 Partial Dependence Plot (PDP)")
 
-    # Let user choose which feature to visualize
-    features_to_plot = ['age', 'sg', 'sc', 'hemo'] 
+    # Let user choose which features to visualize
+    features_to_plot = ['age', 'sg', 'sc', 'hemo']  # Top features
     
-    try:
-        feature_index = final_features.index(feature_to_plot)
+    # Choose PDP data source
+    if 'X_train_scaled' in globals() and X_train_scaled.shape[0] >= 200:
+        pdp_data = X_train_scaled[:200]
+        st.info("✅ Using first 200 rows from X_train_scaled as background for PDP.")
+    else:
+        pdp_data = np.repeat(X_scaled_single, 200, axis=0)
+        noise = np.random.normal(0, 0.01, pdp_data.shape)
+        pdp_data += noise
+        st.warning("⚠️ No X_train_scaled found; using X_scaled_single with added noise as PDP background.")
     
-        # Choose data source for PDP
-        if 'X_train_scaled' in globals() and X_train_scaled.shape[0] >= 200:
-            pdp_data = X_train_scaled[:200]
-            st.info("✅ Using first 200 rows from X_train_scaled as background for PDP.")
-        else:
-            # Duplicate and add noise for synthetic variation
-            pdp_data = np.repeat(X_scaled_single, 200, axis=0)
-            noise = np.random.normal(0, 0.01, pdp_data.shape)  # Small Gaussian noise
-            pdp_data += noise
-            st.warning("⚠️ No X_train_scaled found; using X_scaled_single with added noise as PDP background.")
+    # Convert to DataFrame with feature names for compatibility
+    pdp_df = pd.DataFrame(pdp_data, columns=final_features)
     
-        # Debug output
-        st.text(f"PDP data shape: {pdp_data.shape}")
-        st.text(f"Generating PDP for feature '{feature_to_plot}' at index {feature_index}")
+    # Loop over selected features
+    for feature in features_to_plot:
+        try:
+            feature_index = final_features.index(feature)
     
-        # Convert to DataFrame with feature names for compatibility
-        pdp_df = pd.DataFrame(pdp_data, columns=final_features)
+            # Debug
+            st.text(f"🔍 PDP for feature '{feature}' (index {feature_index})")
     
-        # Plot
-        fig_pdp, ax_pdp = plt.subplots(figsize=(8, 5))
-        PartialDependenceDisplay.from_estimator(
-            model,
-            pdp_df,
-            features=[feature_index],
-            feature_names=final_features,
-            ax=ax_pdp
-        )
-        st.pyplot(fig_pdp)
+            # Plot PDP
+            fig_pdp, ax_pdp = plt.subplots(figsize=(8, 5))
+            PartialDependenceDisplay.from_estimator(
+                model,
+                pdp_df,
+                features=[feature_index],
+                feature_names=final_features,
+                ax=ax_pdp
+            )
+            st.pyplot(fig_pdp)
     
-    except Exception as e:
-        st.error(f"❌ Error generating PDP plot: {e}")
+        except Exception as e:
+            st.error(f"❌ Error generating PDP for {feature}: {e}")
