@@ -20,6 +20,16 @@ from streamlit_shap import st_shap
 from streamlit.components.v1 import html
 import warnings
 warnings.filterwarnings("ignore")
+@st.cache_resource
+def load_model():
+    return joblib.load("my_model.pkl")
+
+model = load_model()
+
+# Optional: cache training data
+@st.cache_data
+def load_training_data():
+    return pd.read_csv("X_train_scaled.csv")
 
 # Load model and scaler
 try:
@@ -356,6 +366,13 @@ if 'X_input' in locals() and not X_input.empty:
     # X_scaled_single: numpy array containing single instance scaled (shape: 1 x n_features)
     # X_input_single_df: pandas DataFrame for the single instance (shape: 1 x n_features)
     
+   
+
+   
+    
+    # Assume model, X_scaled, final_features, X_scaled_single, instance_to_explain_idx are pre-defined
+    
+    # --------------------- LIME ---------------------
     st.subheader(f"🟢 LIME Explanation (Instance {instance_to_explain_idx})")
     
     try:
@@ -367,7 +384,7 @@ if 'X_input' in locals() and not X_input.empty:
             st.write("⚠️ No X_train_scaled found; duplicated X_scaled_single 100 times for LIME background.")
             st.write(f"LIME background data shape: {background_data_for_lime.shape}")
     
-        lime_explainer = LimeTabularExplainer(
+        lime_explainer = lime.lime_tabular.LimeTabularExplainer(
             training_data=background_data_for_lime,
             feature_names=final_features,
             class_names=['No CKD', 'CKD'],
@@ -385,11 +402,12 @@ if 'X_input' in locals() and not X_input.empty:
     except Exception as e:
         st.error(f"❌ Error generating LIME plot: {e}")
     
-    # ----------------- PDP Explanation --------------------
+    # --------------------- PDP ---------------------
     st.subheader("📐 Partial Dependence Plot (PDP)")
     
     try:
-        feature_to_plot = st.selectbox("Select feature for PDP", final_features)
+        feature_to_plot = st.selectbox("Select feature for PDP", final_features, key="pdp_feature")
+        
         if feature_to_plot:
             if 'X_train_scaled' in locals():
                 pdp_data = X_train_scaled
