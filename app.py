@@ -410,7 +410,7 @@ if 'X_input' in locals() and not X_input.empty:
     st.subheader("📐 Partial Dependence Plot (PDP)")
 
     # Let user choose which feature to visualize
-    feature_to_plot = st.selectbox("🔍 Select feature for PDP", final_features)
+    features_to_plot = ['age', 'sg', 'sc', 'hemo'] 
     
     try:
         feature_index = final_features.index(feature_to_plot)
