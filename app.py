@@ -314,12 +314,22 @@ if 'X_input' in locals() and not X_input.empty:
             shap_values_for_instance = shap_values_full[idx]
             shap_values_class1_full = shap_values_full
     
+        idx = instance_to_explain_idx  # your selected instance index
+        
+        explainer = shap.TreeExplainer(model)
+        shap_values_full = explainer.shap_values(X_scaled)
+        
+        expected_value = explainer.expected_value[1]  # class 1 base value
+        shap_values_for_instance = shap_values_full[1][idx]  # class 1 SHAP values for the instance
+        features_for_instance = X_input_single_df.iloc[idx]
+        
         shap_html = shap.plots.force(
             expected_value,
             shap_values_for_instance,
-            X_input_single_df.iloc[idx],
+            features_for_instance,
             matplotlib=False
         )
+        
         components.html(shap_html.html(), height=300)
     
         st.subheader("📊 SHAP Summary Plot")
