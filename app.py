@@ -12,6 +12,7 @@ import joblib
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.inspection import PartialDependenceDisplay
+import streamlit.components.v1 as components
 from io import StringIO
 import os # Import the os module
 
@@ -306,13 +307,19 @@ if 'X_input' in locals() and not X_input.empty:
 
         # Force plot for the selected instance
         # Force plot for the selected instance
+        
         st.subheader("SHAP Force Plot (Instance " + str(instance_to_explain_idx) + ")")
 
-        shap_plot = shap.plots.force(
+# Generate force plot as a JS/HTML object
+        shap_html = shap.plots.force(
             explainer.expected_value[1], 
             shap_values[1][instance_to_explain_idx], 
-            X_input_single_df
+            X_input_single_df,
+            matplotlib=False
         )
+        
+        # Display the force plot HTML in Streamlit
+        components.html(shap_html.html(), height=300)
         
         st.pyplot(shap_plot)
         # SHAP Summary plot for the whole dataset (if uploaded multiple rows) or single row (if manual)
