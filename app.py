@@ -19,14 +19,17 @@ import os # Import the os module
 
 # Load model and scaler
 try:
-    # Attempt to load the files from the current directory
+    # Load model and scaler
     model = joblib.load("model.pkl")
     scaler = joblib.load("scaler.pkl")
     st.success("Model and Scaler loaded successfully.")
 except FileNotFoundError:
     st.error("Error: Model or scaler files not found.")
     st.info("Please ensure 'model.pkl' and 'scaler.pkl' are in the same directory as this script.")
-    st.stop() # Stop the app execution if files are missing
+    st.stop()  # Stop if files not found
+
+# ✅ Now define SHAP explainer after confirming model is loaded
+explainer = shap.TreeExplainer(model) # Stop the app execution if files are missing
 
 
 # Final features used in model
