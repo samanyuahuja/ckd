@@ -382,20 +382,26 @@ if 'X_input' in locals() and not X_input.empty:
 
     
     # Initialize the LIME explainer
-    explainer = lime.lime_tabular.LimeTabularExplainer(
-        training_data=np.array(X_train_scaled),
+    # --------------------------- LIME Explanation --------------------------- #
+    st.subheader("🔍 LIME Explanation")
+    
+    # Create LIME explainer
+    lime_explainer = lime.lime_tabular.LimeTabularExplainer(
+        training_data=np.array(X_input_single_df),
         feature_names=final_features,
         class_names=["No CKD", "CKD"],
-        mode='classification'
+        mode="classification"
     )
     
-    # Explain a single prediction (first row)
-    explanation = explainer.explain_instance(
-        data_row=X_scaled_single[0],
-        predict_fn=model.predict_proba,
-        num_features=10  # Top 10 features to display
+    # Explain the first instance
+    lime_exp = lime_explainer.explain_instance(
+        data_row=X_input_single_df.values[0],  # ✅ correct row format
+        predict_fn=lambda x: model.predict_proba(scaler.transform(pd.DataFrame(x, columns=final_features)))
     )
     
+    # Show LIME explanation in Streamlit
+    fig_lime = lime_exp.as_pyplot_figure()
+    st.pyplot(fig_lime)
     # Plot the explanation
     st.subheader("🧠 LIME Explanation")
     fig_lime = explanation.as_pyplot_figure(label=1)
