@@ -1,9 +1,11 @@
 # Step 1: Install necessary libraries
+# Step 1: Install necessary libraries
+!pip install streamlit shap lime joblib pandas numpy scikit-learn matplotlib seaborn
 
 import streamlit as st
 import pandas as pd
 import numpy as np
-
+import shap
 import lime
 import lime.lime_tabular
 import matplotlib.pyplot as plt
@@ -12,27 +14,8 @@ import joblib
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.inspection import PartialDependenceDisplay
-import streamlit.components.v1 as components
 from io import StringIO
 import os # Import the os module
-import shap
-from streamlit_shap import st_shap
-from streamlit.components.v1 import html
-import warnings
-warnings.filterwarnings("ignore")
-@st.cache_resource
-def load_model():
-    return joblib.load("model.pkl")
-
-
-@st.cache_resource
-def load_scaler():
-    return joblib.load("scaler.pkl") 
-# Optional: cache training data
-@st.cache_data
-def load_training_data():
-    return pd.read_csv("X_train_scaled.csv")
-
 
 # Load model and scaler
 try:
@@ -40,9 +23,6 @@ try:
     model = joblib.load("model.pkl")
     scaler = joblib.load("scaler.pkl")
     st.success("Model and Scaler loaded successfully.")
-
-    # Define SHAP explainer globally after model is loaded
-    explainer = shap.TreeExplainer(model)
 except FileNotFoundError:
     st.error("Error: Model or scaler files not found.")
     st.info("Please ensure 'model.pkl' and 'scaler.pkl' are in the same directory as this script.")
@@ -56,9 +36,9 @@ except FileNotFoundError:
 # Example: scaler features_in_ might be ['age', 'bp', ..., 'hemo_bu']
 # Example: model features_in_ might also be the same list.
 # This list should match the columns provided to the model.
-final_features = ['age', 'bp', 'sg', 'al', 'su', 'rbc', 'pc', 'pcc', 'bgr', 'bu', 'sc', 'sod', 'pot',
-                  'hemo', 'wbcc', 'rbcc', 'htn', 'dm', 'appet', 'pe', 'bun_sc_ratio',
-                  'high_creatinine', 'hemo_bu']# Example list - verify this from your training code
+final_features = ['age', 'bp', 'sg', 'al', 'su', 'rbc', 'pc', 'pcc', 'bgr', 'bu', 'sc',
+                  'sod', 'pot', 'hemo', 'wbcc', 'rbcc', 'htn', 'dm', 'appet', 'pe',
+                  'bun_sc_ratio', 'high_creatinine', 'hemo_bu'] # Example list - verify this from your training code
 
 st.title("CKD Prediction App with Explainability")
 st.write("Upload your data below or manually enter values for prediction.")
@@ -93,7 +73,6 @@ if use_manual_entry:
         'rbcc': 4.5, 'htn': 'no', 'dm': 'no', 'appet': 'good', 'pe': 'no' # Add 'pe'
     }
     # Add placeholders for derived features; they will be calculated later
-    default_values['ba'] = 'notpresent'
     default_values['bun_sc_ratio'] = default_values['bu'] / default_values['sc'] if default_values['sc'] != 0 else 0
     default_values['high_creatinine'] = 1 if default_values['sc'] > 1.2 else 0
     default_values['hemo_bu'] = default_values['hemo'] / (default_values['bu'] + 1) if default_values['bu'] >= 0 else 0
@@ -263,7 +242,6 @@ if 'X_input' in locals() and not X_input.empty:
 
 
     # Scale the input data
-    # Scale input
     try:
         X_scaled = scaler.transform(X_input)
         st.write("Scaled Data Preview:", X_scaled[:5]) # Show preview of scaled data
@@ -276,9 +254,6 @@ if 'X_input' in locals() and not X_input.empty:
     try:
         prediction = model.predict(X_scaled)
         proba = model.predict_proba(X_scaled)[:, 1]
-        shap_values = explainer.shap_values(X_scaled)
-        shap.summary_plot(shap_values, X_scaled, feature_names=final_features)
-       
 
         st.subheader("Prediction")
         # Handle multiple predictions if a CSV was uploaded
@@ -294,7 +269,7 @@ if 'X_input' in locals() and not X_input.empty:
             prediction_single = prediction[instance_to_explain_idx]
             expected_value_single = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
             shap_vals_class1_single = shap_values[1][instance_to_explain_idx] if isinstance(shap_values, list) else shap_values[instance_to_explain_idx]
-            
+
 
         else:
             # Single prediction from manual input
@@ -314,134 +289,98 @@ if 'X_input' in locals() and not X_input.empty:
 
 
     # SHAP Explanation (for the single instance selected or the first instance)
-      # Install via requirements.txt
-    
-    # SHAP Explanation
-    st.subheader("SHAP Explanation")
+    st.subheader("📈 SHAP Explanation")
+    shap.initjs()
+    # Re-calculate explainer and shap_values for the dataset being predicted on
+    # This is important because shap_values should correspond to X_scaled
+    try:
+        explainer = shap.TreeExplainer(model)
+        # Calculate SHAP values for the *entire* input dataset (might be one row or many)
+        shap_values_full = explainer.shap_values(X_scaled)
+        # Select SHAP values for class 1 (CKD)
+        shap_values_class1_full = shap_values_full[1] if isinstance(shap_values_full, list) else shap_values_full
+        expected_value = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
 
-    # Get single input
-    X_single = X_scaled[0:1]
-    features_single = X_input[final_features].iloc[0]
-    
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(X_single)
-       
-    # Log shape
-    st.write(f"shap_values shape: {np.array(shap_values).shape}")
-    
-    # Extract class 1 SHAP values
-    shap_vals_class1 = shap_values[0, :, 1]  # (23,)
-    
-    # Expected value
-    expected_val = explainer.expected_value[1] if isinstance(explainer.expected_value, (list, np.ndarray)) else explainer.expected_value
-    
-    # Create force plot
-    force_plot = shap.force_plot(
-        base_value=expected_val,
-        shap_values=shap_vals_class1,
-        features=features_single,
-        matplotlib=False,
-        show=False
-    )
-    
-    # Display in Streamlit
-    shap_html = f"<head>{shap.getjs()}</head><body>{force_plot.html()}</body>"
-    st.subheader("SHAP Force Plot")
-    html(shap_html, height=300)
-    
-    # Summary Plot
-    st.subheader("SHAP Summary Plot")
-    fig_summary, ax_summary = plt.subplots(figsize=(10, 6))
-    shap.summary_plot(shap_vals_class1.reshape(1, -1), features_single.to_frame().T, plot_type="bar", show=False)
-    st.pyplot(fig_summary)
-        
-  
+        # Force plot for the selected instance
+        st.subheader("SHAP Force Plot (Instance " + str(instance_to_explain_idx) + ")")
+        # Use the single instance data X_input_single_df for feature values
+        shap_html = shap.force_plot(expected_value, shap_vals_class1_single, X_input_single_df, matplotlib=False)
+        from streamlit.components.v1 import html
+        html(shap_html.html(), height=300)
+
+        # SHAP Summary plot for the whole dataset (if uploaded multiple rows) or single row (if manual)
+        st.subheader("📊 SHAP Summary Plot")
+        fig_summary, ax = plt.subplots(figsize=(10, 6)) # Added figure size
+        # Use the full SHAP values for the summary plot
+        shap.summary_plot(shap_values_class1_full, X_input, plot_type="bar", show=False)
+        st.pyplot(fig_summary)
+
+    except Exception as e:
+        st.error(f"Error generating SHAP plots: {e}")
 
 
-    # LIME
-    
-    
-    
-   
-    
-    # Assume these are defined in your app somewhere:
-    # model: your trained sklearn-compatible model
-    # X_scaled: numpy array of current input data, scaled (shape: n_samples x n_features)
-    # final_features: list of feature names (length = n_features)
-    # instance_to_explain_idx: int, index of instance to explain (e.g., 0 for first row)
-    # X_scaled_single: numpy array containing single instance scaled (shape: 1 x n_features)
-    # X_input_single_df: pandas DataFrame for the single instance (shape: 1 x n_features)
-    
-   
+    # LIME Explanation (for the single instance selected or the first instance)
+    st.subheader("🟢 LIME Explanation (Instance " + str(instance_to_explain_idx) + ")")
+    try:
+        # LIME explainer needs training data that was scaled
+        # Ideally, use a representative sample of the *original* scaled training data
+        # For this example, we'll use the current scaled input data (X_scaled) as training_data for LIME,
+        # which is NOT ideal for production but works for demonstrating the fix.
+        # In production, load a small sample of your actual X_train_scaled here.
+        if 'X_train_scaled' not in locals() and X_scaled.shape[0] < 10:
+             st.warning("LIME explainer uses the current input data as background. For better results, provide representative training data.")
+             background_data_for_lime = X_scaled # Fallback for single instance
+        elif 'X_train_scaled' in locals():
+             background_data_for_lime = X_train_scaled # Use actual training data if available
+        else:
+             # If no X_train_scaled, use a sample of current X_scaled if it's large enough
+             background_data_for_lime = X_scaled[:min(100, X_scaled.shape[0])] # Use up to 100 samples
 
-   
-    
-    # Assume model, X_scaled, final_features, X_scaled_single, instance_to_explain_idx are pre-defined
-    
-    # --------------------- LIME ---------------------
+        lime_explainer = lime.lime_tabular.LimeTabularExplainer(
+            training_data=background_data_for_lime, # Use appropriate background data
+            feature_names=final_features,
+            class_names=['No CKD', 'CKD'],
+            mode='classification'
+        )
 
-    
-    # Initialize the LIME explainer
-    # --------------------------- LIME Explanation --------------------------- #
-    st.subheader("🔍 LIME Explanation")
-    
-    # Create LIME explainer
-    lime_explainer = lime.lime_tabular.LimeTabularExplainer(
-        training_data=np.array(X_input_single_df),
-        feature_names=final_features,
-        class_names=["No CKD", "CKD"],
-        mode="classification"
-    )
-    
-    # Explain the first instance
-    lime_exp = lime_explainer.explain_instance(
-        data_row=X_input_single_df.values[0],  # ✅ correct row format
-        predict_fn=lambda x: model.predict_proba(scaler.transform(pd.DataFrame(x, columns=final_features)))
-    )
-    
-    # Show LIME explanation in Streamlit
-    fig_lime = lime_exp.as_pyplot_figure()
-    st.pyplot(fig_lime)
-    # Plot the explanation
-    st.subheader("🧠 LIME Explanation")
-    fig_lime = explanation.as_pyplot_figure(label=1)
-    st.pyplot(fig_lime)
-        
-    # --------------------- PDP ---------------------
+        # Explain the single instance's scaled data point
+        lime_exp = lime_explainer.explain_instance(X_scaled_single[0], model.predict_proba, num_features=10)
+        fig_lime = lime_exp.as_pyplot_figure()
+        st.pyplot(fig_lime)
+
+    except Exception as e:
+        st.error(f"Error generating LIME plot: {e}")
+
+
+    # Partial Dependence Plot
     st.subheader("📐 Partial Dependence Plot (PDP)")
+    try:
+        feature_to_plot = st.selectbox("Select feature for PDP", final_features)
+        if feature_to_plot:
+            fig_pdp, ax_pdp = plt.subplots()
+            # PDP requires a sample of the data the model was trained on.
+            # Using X_scaled (the current input) is only appropriate if it's large and representative.
+            # Ideally, use a small sample of X_train_scaled here.
+            # For demonstration, using X_scaled, but note this limitation.
+            if 'X_train_scaled' in locals():
+                 pdp_data = X_train_scaled[:min(200, X_train_scaled.shape[0])] # Use up to 200 samples from train
+                 pdp_data_df = pd.DataFrame(pdp_data, columns=final_features) # Convert to DF for display function
+            else:
+                 pdp_data = X_scaled[:min(200, X_scaled.shape[0])] # Fallback to current input if large enough
+                 pdp_data_df = pd.DataFrame(pdp_data, columns=final_features) # Convert to DF
 
-    # Let user choose which features to visualize
-    features_to_plot = ['age', 'sg', 'sc', 'hemo']  # Top features
-    
-    # Choose PDP data source
-    if 'X_train_scaled' in globals() and X_train_scaled.shape[0] >= 200:
-        pdp_data = X_train_scaled[:200]
-        st.info("✅ Using first 200 rows from X_train_scaled as background for PDP.")
-    else:
-        pdp_data = X_train.iloc[:200]
-        noise = np.random.normal(0, 0.01, pdp_data.shape)
-        pdp_data += noise
-        st.warning("⚠️ No X_train_scaled found; using X_scaled_single with added noise as PDP background.")
-    
-    # Convert to DataFrame with feature names for compatibility
-    pdp_df = pd.DataFrame(pdp_data, columns=final_features)
-    
-    # Loop over selected features
-    for feature in features_to_plot:
-        try:
-            feature_index = final_features.index(feature)
-    
-          
-            # Plot PDP
-            fig_pdp, ax_pdp = plt.subplots(figsize=(8, 5))
-            PartialDependenceDisplay.from_estimator(
-                model,
-                pdp_df,
-                features=[feature_index],
-                feature_names=final_features,
-                ax=ax_pdp
-            )
-            st.pyplot(fig_pdp)
-    
-        except Exception as e:
-            st.error(f"❌ Error generating PDP for {feature}: {e}")
+            if feature_to_plot in pdp_data_df.columns:
+                PartialDependenceDisplay.from_estimator(
+                    model, pdp_data_df, features=[final_features.index(feature_to_plot)], ax=ax_pdp, feature_names=final_features
+                )
+                st.pyplot(fig_pdp)
+            else:
+                st.warning(f"Feature '{feature_to_plot}' not found in the data used for PDP.")
+
+    except Exception as e:
+        st.error(f"Error generating PDP plot: {e}")
+
+
+else:
+    # This block executes if no file was uploaded and manual input wasn't yet submitted
+    st.info("Enter values manually or upload a CSV to get predictions and explanations.")
