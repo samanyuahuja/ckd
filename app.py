@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import shap
 from streamlit_shap import st_shap
+from streamlit.components.v1 import html
 import lime
 import lime.lime_tabular
 import matplotlib.pyplot as plt
@@ -321,10 +322,17 @@ if 'X_input' in locals() and not X_input.empty:
         expected_value = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
         shap.initjs()
         # Force plot for the selected instance
-        st.subheader("SHAP Force Plot (Instance " + str(instance_to_explain_idx) + ")")
-        # Use the single instance data X_input_single_df for feature values
         st.subheader(f"SHAP Force Plot (Instance {instance_to_explain_idx})")
-        st_shap(shap_plot, height=300)
+
+        # Generate the force plot using the correct v0.20 syntax
+        force_plot_html = shap.plots.force(
+            expected_value,
+            shap_vals_class1_single,
+            X_input_single_df
+        )
+        
+        # Render it in Streamlit using raw HTML
+        html(force_plot_html.html(), height=300)
         # SHAP Summary plot for the whole dataset (if uploaded multiple rows) or single row (if manual)
         st.subheader("📊 SHAP Summary Plot")
         fig_summary, ax = plt.subplots(figsize=(10, 6)) # Added figure size
