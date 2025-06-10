@@ -6,6 +6,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import shap
+from streamlit_shap import st_shap
 import lime
 import lime.lime_tabular
 import matplotlib.pyplot as plt
