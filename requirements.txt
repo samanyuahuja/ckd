@@ -7,5 +7,6 @@ shap==0.45.0
 lime==0.2.0.1
 seaborn==0.13.2
 streamlit-shap==0.1.0
+rich==13.7.1
 ipython
 # Removed pdpbox and streamlit-shap for compatibility
