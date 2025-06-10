@@ -324,15 +324,26 @@ if 'X_input' in locals() and not X_input.empty:
         # Force plot for the selected instance
         st.subheader(f"SHAP Force Plot (Instance {instance_to_explain_idx})")
 
-        # Generate the force plot using the correct v0.20 syntax
-        force_plot_html = shap.plots.force(
-            expected_value,
-            shap_vals_class1_single,
-            X_input_single_df
-        )
+# Make sure explainer and shap_values_class1_full were computed earlier:
+# explainer = shap.Explainer(model)
+# shap_values_class1_full = explainer(X_scaled)  <-- NEW SHAP API
+
+        try:
+            # Generate SHAP values using the modern API (do this earlier in your code):
+            explainer = shap.Explainer(model, X_scaled)  # modern API
+            shap_values = explainer(X_scaled)            # returns shap.Explanation object
         
-        # Render it in Streamlit using raw HTML
-        html(force_plot_html.html(), height=300)
+            # Get instance to explain
+            shap_instance = shap_values[instance_to_explain_idx]
+        
+            # Generate the force plot
+            force_plot_html = shap.plots.force(shap_instance.base_values, shap_instance.values, shap_instance.data)
+        
+            # Display in Streamlit
+            html(force_plot_html.html(), height=300)
+        
+        except Exception as e:
+            st.error(f"Error generating SHAP force plot: {e}")
         # SHAP Summary plot for the whole dataset (if uploaded multiple rows) or single row (if manual)
         st.subheader("📊 SHAP Summary Plot")
         fig_summary, ax = plt.subplots(figsize=(10, 6)) # Added figure size
