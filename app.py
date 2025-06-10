@@ -323,7 +323,7 @@ if 'X_input' in locals() and not X_input.empty:
         # Force plot for the selected instance
         st.subheader("SHAP Force Plot (Instance " + str(instance_to_explain_idx) + ")")
         # Use the single instance data X_input_single_df for feature values
-        shap_plot = shap.plots.force(expected_value_single, shap_vals_class1_single, matplotlib=False)
+        st.subheader(f"SHAP Force Plot (Instance {instance_to_explain_idx})")
         st_shap(shap_plot, height=300)
         # SHAP Summary plot for the whole dataset (if uploaded multiple rows) or single row (if manual)
         st.subheader("📊 SHAP Summary Plot")
