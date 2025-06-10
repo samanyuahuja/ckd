@@ -17,7 +17,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.inspection import PartialDependenceDisplay
 from io import StringIO
 import os # Import the os module
-shap.initjs()
+
 # Load model and scaler
 try:
     # Load model and scaler
@@ -319,7 +319,7 @@ if 'X_input' in locals() and not X_input.empty:
         # Select SHAP values for class 1 (CKD)
         shap_values_class1_full = shap_values_full[1] if isinstance(shap_values_full, list) else shap_values_full
         expected_value = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
-
+        shap.initjs()
         # Force plot for the selected instance
         st.subheader("SHAP Force Plot (Instance " + str(instance_to_explain_idx) + ")")
         # Use the single instance data X_input_single_df for feature values
