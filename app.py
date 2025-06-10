@@ -17,7 +17,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.inspection import PartialDependenceDisplay
 from io import StringIO
 import os # Import the os module
-
+shap.initjs()
 # Load model and scaler
 try:
     # Load model and scaler
@@ -323,10 +323,8 @@ if 'X_input' in locals() and not X_input.empty:
         # Force plot for the selected instance
         st.subheader("SHAP Force Plot (Instance " + str(instance_to_explain_idx) + ")")
         # Use the single instance data X_input_single_df for feature values
-        shap_html = shap.force_plot(expected_value, shap_vals_class1_single, X_input_single_df, matplotlib=False)
-        from streamlit.components.v1 import html
-        html(shap_html.html(), height=300)
-
+        shap_plot = shap.plots.force(expected_value_single, shap_vals_class1_single, matplotlib=False)
+        st_shap(shap_plot, height=300)
         # SHAP Summary plot for the whole dataset (if uploaded multiple rows) or single row (if manual)
         st.subheader("📊 SHAP Summary Plot")
         fig_summary, ax = plt.subplots(figsize=(10, 6)) # Added figure size
