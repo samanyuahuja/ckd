@@ -5,7 +5,7 @@ matplotlib==3.8.4
 streamlit==1.35.0
 shap==0.45.0
 lime==0.2.0.1
-seaborn
-streamlit-shap
+seaborn==0.13.2
+streamlit-shap==0.1.0
 ipython
 # Removed pdpbox and streamlit-shap for compatibility
