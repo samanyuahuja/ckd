@@ -322,22 +322,22 @@ if 'X_input' in locals() and not X_input.empty:
         expected_value = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
         shap.initjs()
         # Force plot for the selected instance
-        st.subheader(f"SHAP Force Plot (Instance {instance_to_explain_idx})")
-
-# Make sure explainer and shap_values_class1_full were computed earlier:
-# explainer = shap.Explainer(model)
-# shap_values_class1_full = explainer(X_scaled)  <-- NEW SHAP API
-
+        st.subheader("📈 SHAP Explanation")
         try:
-            # Generate SHAP values using the modern API (do this earlier in your code):
-            explainer = shap.Explainer(model, X_scaled)  # modern API
-            shap_values = explainer(X_scaled)            # returns shap.Explanation object
+            # Create SHAP explainer using modern API
+            explainer = shap.Explainer(model, X_scaled)
+            shap_values = explainer(X_scaled)  # shap.Explanation object
         
-            # Get instance to explain
+            # Get explanation for specific instance
+            instance_to_explain_idx = 0  # or any index from uploaded data
             shap_instance = shap_values[instance_to_explain_idx]
         
-            # Generate the force plot
-            force_plot_html = shap.plots.force(shap_instance.base_values, shap_instance.values, shap_instance.data)
+            # Generate SHAP force plot HTML
+            st.subheader(f"SHAP Force Plot (Instance {instance_to_explain_idx})")
+            force_plot_html = shap.plots.force(shap_instance.base_values, 
+                                               shap_instance.values, 
+                                               shap_instance.data, 
+                                               matplotlib=False)
         
             # Display in Streamlit
             html(force_plot_html.html(), height=300)
