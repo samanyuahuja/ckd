@@ -309,38 +309,27 @@ if 'X_input' in locals() and not X_input.empty:
         st.stop()
 
     # SHAP Explanation (for the single instance selected or the first instance)
-    st.subheader("📈 SHAP Explanation")
+    # Show SHAP explanation
+    st.subheader("Model Explanation (SHAP)")
     shap.initjs()
-    
     try:
-        # Use modern SHAP API
-        explainer = shap.Explainer(model, X_scaled)
-        shap_values_full = explainer(X_scaled)  # This is a shap.Explanation object
+        explainer = shap.TreeExplainer(model)
+        shap_values_full = explainer.shap_values(X_scaled)
+        shap_values_class1_full = shap_values_full[1] if isinstance(shap_values_full, list) else shap_values_full
+        expected_value = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
     
-        # Force plot for a specific instance
-        instance_to_explain_idx = 0
-        shap_instance = shap_values_full[instance_to_explain_idx]
+        # Use modern API for force plot on single instance
+        st.subheader(f"📈 SHAP Force Plot (Instance {instance_to_explain_idx})")
+        st_shap(shap.plots.force(expected_value, shap_values_class1_full[instance_to_explain_idx], matplotlib=False), height=300)
     
-        st.subheader(f"SHAP Force Plot (Instance {instance_to_explain_idx})")
-        force_plot_html = shap.plots.force(
-            shap_instance.base_values,
-            shap_instance.values,
-            shap_instance.data,
-            matplotlib=False
-        )
-    
-        # Render SHAP force plot
-        st.components.v1.html(force_plot_html.html(), height=300)
-    
-        # SHAP Summary plot for the dataset
+        # SHAP Summary plot
         st.subheader("📊 SHAP Summary Plot")
         fig_summary, ax = plt.subplots(figsize=(10, 6))
-        shap.summary_plot(shap_values_full, X_scaled, plot_type="bar", show=False)
+        shap.summary_plot(shap_values_class1_full, X_input, plot_type="bar", show=False)
         st.pyplot(fig_summary)
     
     except Exception as e:
         st.error(f"Error generating SHAP plots: {e}")
-
     # LIME Explanation (for the single instance selected or the first instance)
     st.subheader("🟢 LIME Explanation (Instance " + str(instance_to_explain_idx) + ")")
     try:
