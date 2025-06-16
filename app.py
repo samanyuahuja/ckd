@@ -31,7 +31,8 @@ except FileNotFoundError:
     st.stop()  # Stop if files not found
 
 # ✅ Now define SHAP explainer after confirming model is loaded
-explainer = shap.TreeExplainer(model) # Stop the app execution if files are missing
+    explainer = shap.Explainer(model, X_scaled)
+     # ✅ returns Explanation object # Stop the app execution if files are missing
 
 
 # Final features used in model
@@ -261,7 +262,7 @@ if 'X_input' in locals() and not X_input.empty:
         proba = model.predict_proba(X_scaled)[:, 1]
     
         # Generate SHAP values first (for all rows)
-        shap_values = explainer.shap_values(X_scaled)
+        shap_values = explainer(X_scaled)
     
         st.subheader("Prediction")
         
