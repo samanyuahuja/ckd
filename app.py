@@ -312,13 +312,16 @@ if 'X_input' in locals() and not X_input.empty:
         explainer = shap.Explainer(model, X_scaled)
         shap_values = explainer(X_scaled)
         
-        instance_to_explain_idx = 0
-        shap_instance = shap_values[instance_to_explain_idx]
-        
-        expected_value_single = shap_instance.base_values
-        shap_vals_class1_single = shap_instance.values
+        shap_instance = shap_values[0]  # first instance
+
+        expected_value_single = shap_instance.base_values    # ✅ correct
+        shap_vals_class1_single = shap_instance.values       # ✅ correct
         
         st.subheader(f"📈 SHAP Force Plot (Instance {instance_to_explain_idx})")
+        st.write("TYPE of expected_value_single:", type(expected_value_single))
+        st.write("TYPE of shap_vals_class1_single:", type(shap_vals_class1_single))
+        st.write("expected_value_single:", expected_value_single)
+        st.write("shap_vals_class1_single shape:", np.shape(shap_vals_class1_single))
         st_shap(shap.plots.force(expected_value_single, shap_vals_class1_single, matplotlib=False), height=300) 
                 # SHAP summary plot
         st.subheader("📊 SHAP Summary Plot")
