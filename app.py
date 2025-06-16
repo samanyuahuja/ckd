@@ -310,22 +310,25 @@ if 'X_input' in locals() and not X_input.empty:
 
     # SHAP Explanation (for the single instance selected or the first instance)
     # Show SHAP explanation
-    st.subheader("Model Explanation (SHAP)")
-    shap.initjs()
+    # SHAP Explanation (for the single instance selected or the first instance)
+    st.subheader("📈 SHAP Explanation")
     try:
-        explainer = shap.TreeExplainer(model)
-        shap_values_full = explainer.shap_values(X_scaled)
-        shap_values_class1_full = shap_values_full[1] if isinstance(shap_values_full, list) else shap_values_full
-        expected_value = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
+        # Modern SHAP explainer
+        explainer = shap.Explainer(model, X_scaled)
+        shap_values = explainer(X_scaled)
     
-        # Use modern API for force plot on single instance
+        # Select instance
+        instance_to_explain_idx = 0
+        shap_instance = shap_values[instance_to_explain_idx]
+    
+        # Force plot
         st.subheader(f"📈 SHAP Force Plot (Instance {instance_to_explain_idx})")
-        st_shap(shap.plots.force(expected_value, shap_values_class1_full[instance_to_explain_idx], matplotlib=False), height=300)
+        st_shap(shap.plots.force(shap_instance.base_values, shap_instance.values, matplotlib=False), height=300)
     
-        # SHAP Summary plot
+        # SHAP summary plot
         st.subheader("📊 SHAP Summary Plot")
         fig_summary, ax = plt.subplots(figsize=(10, 6))
-        shap.summary_plot(shap_values_class1_full, X_input, plot_type="bar", show=False)
+        shap.plots.bar(shap_values, max_display=15, show=False)
         st.pyplot(fig_summary)
     
     except Exception as e:
