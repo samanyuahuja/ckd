@@ -30,8 +30,7 @@ except FileNotFoundError:
     st.info("Please ensure 'model.pkl' and 'scaler.pkl' are in the same directory as this script.")
     st.stop()  # Stop if files not found
 
-# ✅ Now define SHAP explainer after confirming model is loaded
-    explainer = shap.Explainer(model, X_scaled)
+
      # ✅ returns Explanation object # Stop the app execution if files are missing
 
 
@@ -262,6 +261,7 @@ if 'X_input' in locals() and not X_input.empty:
         proba = model.predict_proba(X_scaled)[:, 1]
     
         # Generate SHAP values first (for all rows)
+        explainer = shap.Explainer(model, X_scaled)
         shap_values = explainer(X_scaled)
     
         st.subheader("Prediction")
