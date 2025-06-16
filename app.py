@@ -276,12 +276,9 @@ if 'X_input' in locals() and not X_input.empty:
             X_input_single_df = X_input.iloc[[instance_to_explain_idx]]
             prediction_single = prediction[instance_to_explain_idx]
     
-            expected_value_single = (
-                explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
-            )
-            shap_vals_class1_single = (
-                shap_values[1][instance_to_explain_idx] if isinstance(shap_values, list) else shap_values[instance_to_explain_idx]
-            )
+            shap_instance = shap_values[instance_to_explain_idx]
+            expected_value_single = shap_instance.base_values
+            shap_vals_class1_single = shap_instance.values
     
         else:
             st.write("CKD Likelihood (1 = CKD likely, 0 = CKD unlikely):", int(prediction[0]))
@@ -292,17 +289,14 @@ if 'X_input' in locals() and not X_input.empty:
             X_input_single_df = X_input
             prediction_single = prediction[0]
     
-            expected_value_single = (
-                explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
-            )
-            shap_vals_class1_single = (
-                shap_values[1][0] if isinstance(shap_values, list) else shap_values[0]
-            )
-    
+            shap_instance = shap_values[instance_to_explain_idx]
+            expected_value_single = shap_instance.base_values
+            shap_vals_class1_single = shap_instance.values
         # Show SHAP explanation
         st.subheader("Model Explanation (SHAP)")
         shap.initjs()
-        st_shap(shap.force_plot(expected_value_single, shap_vals_class1_single, X_input_single_df), height=300)
+        shap_instance = shap_values[0]
+        st_shap(shap.plots.force(shap_instance.base_values, shap_instance.values, matplotlib=False), height=300)
     
     except Exception as e:
         st.error(f"Error during prediction: {e}")
