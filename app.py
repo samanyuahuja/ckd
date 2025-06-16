@@ -311,16 +311,16 @@ if 'X_input' in locals() and not X_input.empty:
         # Modern SHAP explainer
         explainer = shap.Explainer(model, X_scaled)
         shap_values = explainer(X_scaled)
-    
-        # Select instance
+        
         instance_to_explain_idx = 0
         shap_instance = shap_values[instance_to_explain_idx]
-    
-        # Force plot
+        
+        expected_value_single = shap_instance.base_values
+        shap_vals_class1_single = shap_instance.values
+        
         st.subheader(f"📈 SHAP Force Plot (Instance {instance_to_explain_idx})")
-        st_shap(shap.plots.force(shap_instance.base_values, shap_instance.values, matplotlib=False), height=300)
-    
-        # SHAP summary plot
+        st_shap(shap.plots.force(expected_value_single, shap_vals_class1_single, matplotlib=False), height=300) 
+                # SHAP summary plot
         st.subheader("📊 SHAP Summary Plot")
         fig_summary, ax = plt.subplots(figsize=(10, 6))
         shap.plots.bar(shap_values, max_display=15, show=False)
