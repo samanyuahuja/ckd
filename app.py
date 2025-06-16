@@ -311,49 +311,35 @@ if 'X_input' in locals() and not X_input.empty:
     # SHAP Explanation (for the single instance selected or the first instance)
     st.subheader("📈 SHAP Explanation")
     shap.initjs()
-    # Re-calculate explainer and shap_values for the dataset being predicted on
-    # This is important because shap_values should correspond to X_scaled
+    
     try:
-        explainer = shap.TreeExplainer(model)
-        # Calculate SHAP values for the *entire* input dataset (might be one row or many)
-        shap_values_full = explainer.shap_values(X_scaled)
-        # Select SHAP values for class 1 (CKD)
-        shap_values_class1_full = shap_values_full[1] if isinstance(shap_values_full, list) else shap_values_full
-        expected_value = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
-        shap.initjs()
-        # Force plot for the selected instance
-        st.subheader("📈 SHAP Explanation")
-        try:
-            # Create SHAP explainer using modern API
-            explainer = shap.Explainer(model, X_scaled)
-            shap_values = explainer(X_scaled)  # shap.Explanation object
-        
-            # Get explanation for specific instance
-            instance_to_explain_idx = 0  # or any index from uploaded data
-            shap_instance = shap_values[instance_to_explain_idx]
-        
-            # Generate SHAP force plot HTML
-            st.subheader(f"SHAP Force Plot (Instance {instance_to_explain_idx})")
-            force_plot_html = shap.plots.force(shap_instance.base_values, 
-                                               shap_instance.values, 
-                                               shap_instance.data, 
-                                               matplotlib=False)
-        
-            # Display in Streamlit
-            html(force_plot_html.html(), height=300)
-        
-        except Exception as e:
-            st.error(f"Error generating SHAP force plot: {e}")
-        # SHAP Summary plot for the whole dataset (if uploaded multiple rows) or single row (if manual)
+        # Use modern SHAP API
+        explainer = shap.Explainer(model, X_scaled)
+        shap_values_full = explainer(X_scaled)  # This is a shap.Explanation object
+    
+        # Force plot for a specific instance
+        instance_to_explain_idx = 0
+        shap_instance = shap_values_full[instance_to_explain_idx]
+    
+        st.subheader(f"SHAP Force Plot (Instance {instance_to_explain_idx})")
+        force_plot_html = shap.plots.force(
+            shap_instance.base_values,
+            shap_instance.values,
+            shap_instance.data,
+            matplotlib=False
+        )
+    
+        # Render SHAP force plot
+        st.components.v1.html(force_plot_html.html(), height=300)
+    
+        # SHAP Summary plot for the dataset
         st.subheader("📊 SHAP Summary Plot")
-        fig_summary, ax = plt.subplots(figsize=(10, 6)) # Added figure size
-        # Use the full SHAP values for the summary plot
-        shap.summary_plot(shap_values_class1_full, X_input, plot_type="bar", show=False)
+        fig_summary, ax = plt.subplots(figsize=(10, 6))
+        shap.summary_plot(shap_values_full, X_scaled, plot_type="bar", show=False)
         st.pyplot(fig_summary)
-
+    
     except Exception as e:
         st.error(f"Error generating SHAP plots: {e}")
-
 
     # LIME Explanation (for the single instance selected or the first instance)
     st.subheader("🟢 LIME Explanation (Instance " + str(instance_to_explain_idx) + ")")
