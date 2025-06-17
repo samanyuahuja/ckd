@@ -8,6 +8,7 @@ import numpy as np
 import shap
 import streamlit.components.v1 as components  # Already imported above, just making sure
 
+import matplotlib.pyplot as plt
 from streamlit_shap import st_shap
 from streamlit.components.v1 import html
 from lime.lime_tabular import LimeTabularExplainer
@@ -308,31 +309,21 @@ if 'X_input' in locals() and not X_input.empty:
     st.subheader("📈 SHAP Explanation")
   
     
+
     try:
         explainer = shap.Explainer(model, X_scaled)
         shap_values = explainer(X_scaled)
     
-        instance_to_explain_idx = 0
-        shap_instance = shap_values[instance_to_explain_idx]
+        shap_instance = shap_values[0]
     
-        base_value = shap_instance.base_values
-        shap_contribs = shap_instance.values
-        shap_features = shap_instance.data
+        st.subheader("📈 SHAP Force Plot (Matplotlib version — static image)")
     
-        st.subheader(f"📈 SHAP Force Plot (Instance {instance_to_explain_idx})")
-    
-        # ✅ NEW: Generate modern SHAP force plot HTML
-        force_plot = shap.plots.force(base_value, shap_contribs, shap_features, matplotlib=False)
-    
-        # ✅ Show as HTML using Streamlit
-        components.html(force_plot.html(), height=300)
+        fig, ax = plt.subplots(figsize=(12, 1))
+        shap.plots.force(shap_instance, matplotlib=True, show=False)
+        st.pyplot(fig)
     
     except Exception as e:
         st.error(f"SHAP force plot failed: {e}")
-
-    
-    except Exception as e:
-        st.error(f"Error generating SHAP plots: {e}")
     # LIME Explanation (for the single instance selected or the first instance)
     st.subheader("🟢 LIME Explanation (Instance " + str(instance_to_explain_idx) + ")")
     try:
