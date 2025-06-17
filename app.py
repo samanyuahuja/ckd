@@ -311,20 +311,21 @@ if 'X_input' in locals() and not X_input.empty:
     
 
     try:
+        # ✅ Create SHAP Explanation object
         explainer = shap.Explainer(model, X_scaled)
         shap_values = explainer(X_scaled)
     
-        shap_instance = shap_values[0]
+        st.subheader("📈 SHAP Force Plot (Instance 0)")
     
-        st.subheader("📈 SHAP Force Plot (Matplotlib version — static image)")
+        # ✅ Just pass the Explanation object directly!
+        fig = shap.plots.force(shap_values[0], matplotlib=True, show=False)
     
-        fig, ax = plt.subplots(figsize=(12, 1))
-        shap.plots.force(shap_instance, matplotlib=True, show=False)
-        st.pyplot(fig)
+        import matplotlib.pyplot as plt
+        st.pyplot(plt.gcf())  # ✅ Show static force plot
     
     except Exception as e:
         st.error(f"SHAP force plot failed: {e}")
-    # LIME Explanation (for the single instance selected or the first instance)
+        # LIME Explanation (for the single instance selected or the first instance)
     st.subheader("🟢 LIME Explanation (Instance " + str(instance_to_explain_idx) + ")")
     try:
         # LIME explainer needs training data that was scaled
