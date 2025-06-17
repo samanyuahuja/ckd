@@ -306,29 +306,30 @@ if 'X_input' in locals() and not X_input.empty:
     # Show SHAP explanation
     # SHAP Explanation (for the single instance selected or the first instance)
     st.subheader("📈 SHAP Explanation")
+  
+    
     try:
-    # ✅ Ensure modern SHAP explainer and explanation object
         explainer = shap.Explainer(model, X_scaled)
-        shap_values = explainer(X_scaled)  # <--- returns shap.Explanation, not a NumPy array
+        shap_values = explainer(X_scaled)
     
         instance_to_explain_idx = 0
         shap_instance = shap_values[instance_to_explain_idx]
     
-        expected_value_single = shap_instance.base_values
-        shap_vals_class1_single = shap_instance.values
+        base_value = shap_instance.base_values
+        shap_contribs = shap_instance.values
+        shap_features = shap_instance.data
     
         st.subheader(f"📈 SHAP Force Plot (Instance {instance_to_explain_idx})")
-        st.write("TYPE of expected_value_single:", type(expected_value_single))
-        st.write("TYPE of shap_vals_class1_single:", type(shap_vals_class1_single))
-        st.write("expected_value_single:", expected_value_single)
-        st.write("shap_vals_class1_single shape:", np.shape(shap_vals_class1_single))
     
-        st_shap(shap.plots.force(expected_value_single, shap_vals_class1_single, matplotlib=False), height=300)
+        # ✅ NEW: Generate modern SHAP force plot HTML
+        force_plot = shap.plots.force(base_value, shap_contribs, shap_features, matplotlib=False)
     
-        st.subheader("📊 SHAP Summary Plot")
-        fig_summary, ax = plt.subplots(figsize=(10, 6))
-        shap.plots.bar(shap_values, max_display=15, show=False)
-        st.pyplot(fig_summary)
+        # ✅ Show as HTML using Streamlit
+        components.html(force_plot.html(), height=300)
+    
+    except Exception as e:
+        st.error(f"SHAP force plot failed: {e}")
+
     
     except Exception as e:
         st.error(f"Error generating SHAP plots: {e}")
