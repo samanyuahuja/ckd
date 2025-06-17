@@ -8,15 +8,12 @@ import numpy as np
 import shap
 from streamlit_shap import st_shap
 from streamlit.components.v1 import html
-import lime
-import lime.lime_tabular
+from lime.lime_tabular import LimeTabularExplainer
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.inspection import PartialDependenceDisplay
-from io import StringIO
 import os # Import the os module
 
 # Load model and scaler
@@ -308,22 +305,24 @@ if 'X_input' in locals() and not X_input.empty:
     # SHAP Explanation (for the single instance selected or the first instance)
     st.subheader("📈 SHAP Explanation")
     try:
-        # Modern SHAP explainer
+    # ✅ Ensure modern SHAP explainer and explanation object
         explainer = shap.Explainer(model, X_scaled)
-        shap_values = explainer(X_scaled)
-        
-        shap_instance = shap_values[0]  # first instance
-
-        expected_value_single = shap_instance.base_values    # ✅ correct
-        shap_vals_class1_single = shap_instance.values       # ✅ correct
-        
+        shap_values = explainer(X_scaled)  # <--- returns shap.Explanation, not a NumPy array
+    
+        instance_to_explain_idx = 0
+        shap_instance = shap_values[instance_to_explain_idx]
+    
+        expected_value_single = shap_instance.base_values
+        shap_vals_class1_single = shap_instance.values
+    
         st.subheader(f"📈 SHAP Force Plot (Instance {instance_to_explain_idx})")
         st.write("TYPE of expected_value_single:", type(expected_value_single))
         st.write("TYPE of shap_vals_class1_single:", type(shap_vals_class1_single))
         st.write("expected_value_single:", expected_value_single)
         st.write("shap_vals_class1_single shape:", np.shape(shap_vals_class1_single))
-        st_shap(shap.plots.force(expected_value_single, shap_vals_class1_single, matplotlib=False), height=300) 
-                # SHAP summary plot
+    
+        st_shap(shap.plots.force(expected_value_single, shap_vals_class1_single, matplotlib=False), height=300)
+    
         st.subheader("📊 SHAP Summary Plot")
         fig_summary, ax = plt.subplots(figsize=(10, 6))
         shap.plots.bar(shap_values, max_display=15, show=False)
