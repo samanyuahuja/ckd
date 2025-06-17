@@ -6,6 +6,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import shap
+import streamlit.components.v1 as components  # Already imported above, just making sure
+
 from streamlit_shap import st_shap
 from streamlit.components.v1 import html
 from lime.lime_tabular import LimeTabularExplainer
