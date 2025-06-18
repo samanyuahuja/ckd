@@ -1,37 +1,33 @@
 # Step 1: Install necessary libraries
 # Step 1: Install necessary libraries
-
+# Step 1: Install necessary libraries
+!pip install streamlit shap lime joblib pandas numpy scikit-learn matplotlib seaborn
 
 import streamlit as st
 import pandas as pd
 import numpy as np
 import shap
-import streamlit.components.v1 as components  # Already imported above, just making sure
-
-import matplotlib.pyplot as plt
-from streamlit_shap import st_shap
-from streamlit.components.v1 import html
-from lime.lime_tabular import LimeTabularExplainer
+import lime
+import lime.lime_tabular
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.inspection import PartialDependenceDisplay
+from io import StringIO
 import os # Import the os module
 
 # Load model and scaler
 try:
-    # Load model and scaler
+    # Attempt to load the files from the current directory
     model = joblib.load("model.pkl")
     scaler = joblib.load("scaler.pkl")
     st.success("Model and Scaler loaded successfully.")
 except FileNotFoundError:
     st.error("Error: Model or scaler files not found.")
     st.info("Please ensure 'model.pkl' and 'scaler.pkl' are in the same directory as this script.")
-    st.stop()  # Stop if files not found
-
-
-     # ✅ returns Explanation object # Stop the app execution if files are missing
+    st.stop() # Stop the app execution if files are missing
 
 
 # Final features used in model
@@ -259,73 +255,72 @@ if 'X_input' in locals() and not X_input.empty:
     try:
         prediction = model.predict(X_scaled)
         proba = model.predict_proba(X_scaled)[:, 1]
-    
-        # Generate SHAP values first (for all rows)
-        explainer = shap.Explainer(model, X_scaled)
-        shap_values = explainer(X_scaled)
-    
+
         st.subheader("Prediction")
-        
+        # Handle multiple predictions if a CSV was uploaded
         if X_input.shape[0] > 1:
             st.write("Predictions:", prediction.tolist())
             st.write("Probabilities of CKD:", [round(p, 3) for p in proba.tolist()])
-    
+            # For explanations, might want to pick one row or add a selector
+            # For simplicity, explain the first row for now
             instance_to_explain_idx = 0
             st.write(f"\nShowing explanations for the first instance (Row {instance_to_explain_idx})")
-    
             X_scaled_single = X_scaled[instance_to_explain_idx].reshape(1, -1)
             X_input_single_df = X_input.iloc[[instance_to_explain_idx]]
             prediction_single = prediction[instance_to_explain_idx]
-    
-            shap_instance = shap_values[instance_to_explain_idx]
-            expected_value_single = shap_instance.base_values
-            shap_vals_class1_single = shap_instance.values
-    
+            expected_value_single = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
+            shap_vals_class1_single = shap_values[1][instance_to_explain_idx] if isinstance(shap_values, list) else shap_values[instance_to_explain_idx]
+
+
         else:
+            # Single prediction from manual input
             st.write("CKD Likelihood (1 = CKD likely, 0 = CKD unlikely):", int(prediction[0]))
             st.write("Probability of CKD:", round(proba[0], 3))
-    
-            instance_to_explain_idx = 0
+            instance_to_explain_idx = 0 # Only one instance
             X_scaled_single = X_scaled
             X_input_single_df = X_input
             prediction_single = prediction[0]
-    
-            shap_instance = shap_values[instance_to_explain_idx]
-            expected_value_single = shap_instance.base_values
-            shap_vals_class1_single = shap_instance.values
-        # Show SHAP explanation
-        st.subheader("Model Explanation (SHAP)")
-        shap.initjs()
-        shap_instance = shap_values[0]
-        st_shap(shap.plots.force(shap_instance.base_values, shap_instance.values, matplotlib=False), height=300)
-    
+            expected_value_single = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
+            shap_vals_class1_single = shap_values[1][0] if isinstance(shap_values, list) else shap_values[0]
+
+
     except Exception as e:
         st.error(f"Error during prediction: {e}")
         st.stop()
 
-    # SHAP Explanation (for the single instance selected or the first instance)
-    # Show SHAP explanation
+
     # SHAP Explanation (for the single instance selected or the first instance)
     st.subheader("📈 SHAP Explanation")
-  
-    
-
+    shap.initjs()
+    # Re-calculate explainer and shap_values for the dataset being predicted on
+    # This is important because shap_values should correspond to X_scaled
     try:
-        # ✅ Create SHAP Explanation object
-        explainer = shap.Explainer(model, X_scaled)
-        shap_values = explainer(X_scaled)
-    
-        st.subheader("📈 SHAP Force Plot (Instance 0)")
-    
-        # ✅ Just pass the Explanation object directly!
-        fig = shap.plots.force(shap_values[0], matplotlib=True, show=False)
-    
-        import matplotlib.pyplot as plt
-        st.pyplot(plt.gcf())  # ✅ Show static force plot
-    
+        explainer = shap.TreeExplainer(model)
+        # Calculate SHAP values for the *entire* input dataset (might be one row or many)
+        shap_values_full = explainer.shap_values(X_scaled)
+        # Select SHAP values for class 1 (CKD)
+        shap_values_class1_full = shap_values_full[1] if isinstance(shap_values_full, list) else shap_values_full
+        expected_value = explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value
+
+        # Force plot for the selected instance
+        st.subheader("SHAP Force Plot (Instance " + str(instance_to_explain_idx) + ")")
+        # Use the single instance data X_input_single_df for feature values
+        shap_html = shap.force_plot(expected_value, shap_vals_class1_single, X_input_single_df, matplotlib=False)
+        from streamlit.components.v1 import html
+        html(shap_html.html(), height=300)
+
+        # SHAP Summary plot for the whole dataset (if uploaded multiple rows) or single row (if manual)
+        st.subheader("📊 SHAP Summary Plot")
+        fig_summary, ax = plt.subplots(figsize=(10, 6)) # Added figure size
+        # Use the full SHAP values for the summary plot
+        shap.summary_plot(shap_values_class1_full, X_input, plot_type="bar", show=False)
+        st.pyplot(fig_summary)
+
     except Exception as e:
-        st.error(f"SHAP force plot failed: {e}")
-        # LIME Explanation (for the single instance selected or the first instance)
+        st.error(f"Error generating SHAP plots: {e}")
+
+
+    # LIME Explanation (for the single instance selected or the first instance)
     st.subheader("🟢 LIME Explanation (Instance " + str(instance_to_explain_idx) + ")")
     try:
         # LIME explainer needs training data that was scaled
@@ -390,3 +385,6 @@ if 'X_input' in locals() and not X_input.empty:
 else:
     # This block executes if no file was uploaded and manual input wasn't yet submitted
     st.info("Enter values manually or upload a CSV to get predictions and explanations.")
+
+
+
