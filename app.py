@@ -306,7 +306,11 @@ if 'X_input' in locals() and not X_input.empty:
     shap_values = explainer(X_scaled)
     
     # SHAP Force Plot (HTML)
-    force_plot = shap.plots.force(shap_values[0])
+    force_plot = shap.plots.force(
+        shap_values[0].base_values,
+        shap_values[0].values,
+        shap_values[0].data
+    )
     st.components.v1.html(force_plot.html(), height=300)
     
     # SHAP Summary Bar Plot
