@@ -307,10 +307,12 @@ if 'X_input' in locals() and not X_input.empty:
     
     # SHAP Force Plot (HTML)
     force_plot = shap.plots.force(
-        shap_values[0].base_values,
-        shap_values[0].values,
-        shap_values[0].data
-    )
+    # Generate SHAP force plot using correct inputs
+    base_value = shap_values.base_values[0]
+    shap_value_row = shap_values.values[0]
+    input_row = shap_values.data[0]
+    
+    force_plot = shap.plots.force(base_value, shap_value_row, input_row)
     st.components.v1.html(force_plot.html(), height=300)
     
     # SHAP Summary Bar Plot
