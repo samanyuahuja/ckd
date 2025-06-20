@@ -258,9 +258,8 @@ if 'X_input' in locals() and not X_input.empty:
         proba = model.predict_proba(X_scaled)[:, 1]
         
         # ✅ FIX: define explainer and shap_values here
-        explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(X_scaled)
-
+        explainer = shap.Explainer(model, X_scaled)
+        shap_values = explainer(X_scaled)
         st.subheader("Prediction")
         # Handle multiple predictions if a CSV was uploaded
         if X_input.shape[0] > 1:
@@ -307,12 +306,7 @@ if 'X_input' in locals() and not X_input.empty:
     shap_values = explainer(X_scaled)
     
     # SHAP Force Plot (HTML)
-    force_plot = shap.plots.force(
-        shap_values[0].base_values,
-        shap_values[0].values,
-        shap_values[0].data
-        
-    )
+    force_plot = shap.plots.force(shap_values[0])
     st.components.v1.html(force_plot.html(), height=300)
     
     # SHAP Summary Bar Plot
