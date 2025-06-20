@@ -302,17 +302,21 @@ if 'X_input' in locals() and not X_input.empty:
     features_single = X_input[final_features].iloc[0:1]
     
     # TreeExplainer
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer(X_scaled)
+    # Re-create SHAP explainer using shap.Explainer (not TreeExplainer)
+    explainer = shap.Explainer(model, X_scaled)
+    shap_values = explainer(X_scaled)  # This returns a shap.Explanation object
     
-    # SHAP Force Plot (HTML)
-    force_plot = shap.plots.force(
-    # Generate SHAP force plot using correct inputs
-    base_value = shap_values.base_values[0]
-    shap_value_row = shap_values.values[0]
-    input_row = shap_values.data[0]
-    )
-    force_plot = shap.plots.force(base_value, shap_value_row, input_row)
+    # Select the first instance for explanation
+    instance_index = 0
+    base_value = shap_values.base_values[instance_index]
+    shap_value_row = shap_values.values[instance_index]
+    input_row = shap_values.data[instance_index]
+    
+    # Generate SHAP force plot
+    force_plot = shap.plots.force(base_value, shap_value_row, input_row, matplotlib=False)
+    
+    # Display in Streamlit
+    st.subheader("🔍 SHAP Force Plot")
     st.components.v1.html(force_plot.html(), height=300)
     
     # SHAP Summary Bar Plot
