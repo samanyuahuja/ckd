@@ -307,14 +307,13 @@ if 'X_input' in locals() and not X_input.empty:
     shap_values = explainer(X_scaled)
     
     # SHAP Force Plot (HTML)
-    st.subheader("SHAP Force Plot")
-    shap.initjs()
-    force_plot = shap.force_plot(
-        explainer.expected_value,
-        shap_values.values[0],
-        features=features_single
+    force_plot = shap.plots.force(
+        shap_values[0].base_values,
+        shap_values[0].values,
+        shap_values[0].data,
+        matplotlib=False
     )
-    components.html(force_plot.html(), height=300)
+    st.components.v1.html(force_plot.html(), height=300)
     
     # SHAP Summary Bar Plot
     st.subheader("SHAP Summary Plot")
