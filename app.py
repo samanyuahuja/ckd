@@ -310,16 +310,15 @@ if 'X_input' in locals() and not X_input.empty:
     # Generate JS-based force plot using shap.force_plot (NOT shap.plots.force)
     # ✅ Modern SHAP v0.20+ compatible
     # Use the OLD API with JS force plot
-    force_plot_html = shap.force_plot(
+    # Use shap.Explanation object with shap.plots.force()
+    shap_plot = shap.plots.force(
         shap_values.base_values[instance_index],
         shap_values.values[instance_index],
-        shap_values.data[instance_index],
-        feature_names=X_input.columns,
-        matplotlib=False  # ✅ Required to return JS (HTML) force plot
+        matplotlib=True  # Note: this works visually but is not JS-embeddable in Streamlit
     )
-    
+    st.pyplot(shap_plot)
     # Streamlit rendering
-    components.html(force_plot_html, height=300)
+   
     
 
     
