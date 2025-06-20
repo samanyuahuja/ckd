@@ -311,7 +311,7 @@ if 'X_input' in locals() and not X_input.empty:
     base_value = shap_values.base_values[0]
     shap_value_row = shap_values.values[0]
     input_row = shap_values.data[0]
-    
+    )
     force_plot = shap.plots.force(base_value, shap_value_row, input_row)
     st.components.v1.html(force_plot.html(), height=300)
     
