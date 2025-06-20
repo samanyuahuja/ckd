@@ -255,6 +255,10 @@ if 'X_input' in locals() and not X_input.empty:
     try:
         prediction = model.predict(X_scaled)
         proba = model.predict_proba(X_scaled)[:, 1]
+        
+        # ✅ FIX: define explainer and shap_values here
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(X_scaled)
 
         st.subheader("Prediction")
         # Handle multiple predictions if a CSV was uploaded
