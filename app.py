@@ -146,19 +146,29 @@ if X_input_df is not None:
 
     # ---------------- SHAP ----------------
     st.subheader("📊 SHAP Explanation")
+
+    # Compute SHAP values (works with tree models, sklearn, etc.)
     explainer = shap.Explainer(model, X_scaled)
     shap_values = explainer(X_scaled)
-
+    
+    # Safely extract the first explanation object
+    explanation = shap_values[0]
+    
+    # ✅ SHAP Force Plot with matplotlib backend (100% safe)
     fig_force = shap.plots.force(
-        shap_values[0].base_values,
-        shap_values[0].values,
+        base_value=explanation.base_values,
+        shap_values=explanation.values,
+        features=explanation.data,
         matplotlib=True
     )
     st.pyplot(fig_force)
-
-    fig_summary, _ = plt.subplots(figsize=(10, 6))
+    
+    # ✅ SHAP Summary Plot
+    st.subheader("📊 SHAP Summary Plot")
+    fig_summary, ax_summary = plt.subplots(figsize=(10, 6))
     shap.plots.bar(shap_values, show=False)
     st.pyplot(fig_summary)
+
 
     # ---------------- LIME ----------------
     st.subheader("🟢 LIME Explanation")
