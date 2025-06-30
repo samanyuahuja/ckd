@@ -146,26 +146,19 @@ if X_input_df is not None:
 
     # ---------------- SHAP ----------------
     st.subheader("📊 SHAP Explanation")
-
-    # Compute SHAP values (works with tree models, sklearn, etc.)
+    
+    # Compute SHAP values
     explainer = shap.Explainer(model, X_scaled)
     shap_values = explainer(X_scaled)
     
-    # Safely extract the first explanation object
-    explanation = shap_values[0]
+    # ✅ Waterfall plot (for first instance)
+    st.subheader("SHAP Waterfall Plot (Instance 0)")
+    fig_waterfall = shap.plots.waterfall(shap_values[0], show=False)
+    st.pyplot(bbox_inches='tight', pad_inches=0)
     
-    # ✅ SHAP Force Plot with matplotlib backend (100% safe)
-    fig_force = shap.plots.force(
-        base_value=explanation.base_values,
-        shap_values=explanation.values,
-        features=explanation.data,
-        matplotlib=True
-    )
-    st.pyplot(fig_force)
-    
-    # ✅ SHAP Summary Plot
-    st.subheader("📊 SHAP Summary Plot")
-    fig_summary, ax_summary = plt.subplots(figsize=(10, 6))
+    # ✅ Summary bar plot
+    st.subheader("SHAP Summary Bar Plot")
+    fig_summary, _ = plt.subplots(figsize=(10, 6))
     shap.plots.bar(shap_values, show=False)
     st.pyplot(fig_summary)
 
