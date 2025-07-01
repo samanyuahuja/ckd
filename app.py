@@ -146,32 +146,30 @@ if X_input_df is not None:
 
     # ---------------- SHAP ----------------
     st.subheader("📊 SHAP Explanation")
-
+    
     explainer = shap.Explainer(model, X_scaled)
     shap_values = explainer(X_scaled)
     
-    # Verify the SHAP values structure first
-    if len(shap_values) > 0:
-        st.write("SHAP values computed for", len(shap_values), "instance(s).")
-    
-        # ✅ Waterfall plot for first instance
-        try:
-            st.subheader("SHAP Waterfall Plot (Instance 0)")
-            fig_waterfall = shap.plots.waterfall(shap_values[0], show=False)
-            st.pyplot(bbox_inches='tight', pad_inches=0)
-        except ValueError as e:
-            st.error(f"Waterfall plot failed: {e}")
-            st.info("This usually means SHAP values or features are mismatched. Try inspecting the SHAP values object.")
+    # If model is multi-output, extract class 1 SHAP values
+    if isinstance(shap_values.values, list):
+        # SHAP returned list of arrays, multi-class model
+        shap_values_class1 = shap_values[:, :, 1]
     else:
-        st.warning("No SHAP values were computed.")
+        # Binary, single output
+        shap_values_class1 = shap_values
+    
+    # ✅ Waterfall for first instance, class 1
+    try:
+        st.subheader("SHAP Waterfall Plot (Instance 0)")
+        shap.plots.waterfall(shap_values_class1[0])
+    except Exception as e:
+        st.error(f"Waterfall plot failed: {e}")
     
     # ✅ Summary bar plot
     try:
         st.subheader("SHAP Summary Bar Plot")
-        fig_summary, _ = plt.subplots(figsize=(10, 6))
-        shap.plots.bar(shap_values, show=False)
-        st.pyplot(fig_summary)
-    except ValueError as e:
+        shap.plots.bar(shap_values_class1)
+    except Exception as e:
         st.error(f"Bar plot failed: {e}")
 
     st.write("SHAP values base_value:", shap_values[0].base_values)
