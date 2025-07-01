@@ -29,7 +29,6 @@ else:
 
 st.write("Scaler mean_:", scaler.mean_)
 st.write("Scaler var_:", scaler.var_)
-st.write("X_input_df before scaling:", X_input_df)
 
 # ---------------- Define final features ----------------
 
