@@ -157,8 +157,8 @@ if X_input_df is not None:
     # ---------------- SHAP ----------------
     st.subheader("📊 SHAP Explanation")
     
-   explainer = shap.TreeExplainer(model)
-   shap_values = explainer.shap_values(X_scaled)  # Pass scaled data for RandomForest
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(X_scaled)  # Pass scaled data for RandomForest
 
 
 
