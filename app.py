@@ -141,26 +141,17 @@ if X_input_df is not None:
     st.write("⚡ Input features:", X_input_df.columns.tolist())
     X_scaled = scaler.transform(X_input_df)
     # 🔍 Debug info: Scaler expectations
-    st.write("⚡ Scaler mean_:", scaler.mean_)
-    st.write("⚡ Scaler var_:", scaler.var_)
-    st.write("⚡ Scaler feature names:", scaler.feature_names_in_.tolist())
+    debug_info = []
+    debug_info.append("==== DEBUG INFO ====")
+    debug_info.append(f"Scaler features: {scaler.feature_names_in_.tolist()}")
+    debug_info.append(f"Input features: {X_input_df.columns.tolist()}")
+    debug_info.append(f"X_scaled first row: {X_scaled[0].tolist()}")
     
-    # 🔍 Debug info: Input before scaling
-    st.write("⚡ Raw input values (first row):")
-    st.write(X_input_df.iloc[0])
+    # Combine all debug lines
+    debug_text = "\n".join(debug_info)
     
-    # 🔍 Debug info: Input after scaling
-    st.write("⚡ Scaled input values (first row):")
-    st.write(X_scaled[0])
-    
-    # 🔍 Check if scaled values are far from 0 (mean-centered) or far from unit variance
-    import numpy as np
-    diff_from_mean = np.abs(X_scaled[0]).round(3)
-    st.write("⚡ How far each scaled feature is from 0 mean:", diff_from_mean)
-    
-    # 🔍 Check model raw probability
-    proba_raw = model.predict_proba(X_scaled)[0]
-    st.write("⚡ Model raw probabilities [No CKD, CKD]:", proba_raw)
+    # Show in Streamlit in text area so you can easily copy
+    st.text_area("🔍 Debug Output (copy this for ChatGPT)", debug_text, height=200)
     #test over
     prediction = model.predict(X_scaled)
     proba = model.predict_proba(X_scaled)[:, 1]
