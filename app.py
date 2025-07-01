@@ -26,8 +26,7 @@ if X_train_scaled is None:
     st.warning("⚠ X_train_scaled is missing. LIME and PDP may fail without it.")
 else:
     st.write("✅ X_train_scaled loaded. Shape:", X_train_scaled.shape)
-print("X_scaled shape:", X_scaled.shape)
-print("X_train_scaled shape:", X_train_scaled.shape if X_train_scaled is not None else "None")
+
 st.write("Scaler mean_:", scaler.mean_)
 st.write("Scaler var_:", scaler.var_)
 
