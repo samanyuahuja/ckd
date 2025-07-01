@@ -27,7 +27,9 @@ if X_train_scaled is None:
 else:
     st.write("✅ X_train_scaled loaded. Shape:", X_train_scaled.shape)
 
-
+st.write("Scaler mean_:", scaler.mean_)
+st.write("Scaler var_:", scaler.var_)
+st.write("X_input_df before scaling:", X_input_df)
 
 # ---------------- Define final features ----------------
 
