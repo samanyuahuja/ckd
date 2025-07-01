@@ -196,6 +196,7 @@ if X_input_df is not None:
         st.error(f"SHAP plot failed: {e}")
 
     # ---------------- LIME ----------------
+    # ---------------- LIME ----------------
     st.subheader("🟢 LIME Explanation")
     try:
         lime_explainer = lime.lime_tabular.LimeTabularExplainer(
@@ -207,7 +208,7 @@ if X_input_df is not None:
         
         lime_exp = lime_explainer.explain_instance(
             X_scaled[0],
-            lambda x: model.predict_proba(x).astype(float),  # ensure float + correct shape
+            lambda x: model.predict_proba(x).astype(float),  # ensure float dtype, proper slicing
             num_features=10
         )
         
