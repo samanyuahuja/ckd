@@ -145,15 +145,12 @@ if X_input_df is not None:
     debug_info.append("==== DEBUG INFO ====")
     debug_info.append(f"Scaler features: {scaler.feature_names_in_.tolist()}")
     debug_info.append(f"Input features: {X_input_df.columns.tolist()}")
-    debug_info.append(f"X_scaled first row: {X_scaled[0].tolist()}")
-    
-    # Combine all debug lines
-    debug_text = "\n".join(debug_info)
-    
-    # Show in Streamlit in text area so you can easily copy
-    st.text_area("🔍 Debug Output (copy this for ChatGPT)", debug_text, height=200)
     debug_info.append(f"Scaler mean_: {scaler.mean_.tolist()}")
     debug_info.append(f"Scaler var_: {scaler.var_.tolist()}")
+    debug_info.append(f"X_scaled first row: {X_scaled[0].tolist()}")
+    
+    for line in debug_info:
+        st.write(line)
     #test over
     prediction = model.predict(X_scaled)
     proba = model.predict_proba(X_scaled)[:, 1]
