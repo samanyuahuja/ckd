@@ -157,8 +157,9 @@ if X_input_df is not None:
     # ---------------- SHAP ----------------
     st.subheader("📊 SHAP Explanation")
     
-    explainer = shap.Explainer(model, X_scaled)
-    shap_values = explainer(X_scaled)
+   explainer = shap.TreeExplainer(model)
+   shap_values = explainer.shap_values(X_scaled)  # Pass scaled data for RandomForest
+
 
 
     
@@ -174,7 +175,11 @@ if X_input_df is not None:
     # Waterfall
     try:
         st.subheader("SHAP Waterfall Plot (Instance 0)")
-        shap.plots.waterfall(shap_values[0, :, 1])  # class 1 SHAP values
+        shap.plots.waterfall(shap.Explanation(values=shap_values[1][0],
+                                      base_values=explainer.expected_value[1],
+                                      data=X_input_df.iloc[0],
+                                      feature_names=X_input_df.columns.tolist()))
+  # class 1 SHAP values
 
     except Exception as e:
         st.error(f"Waterfall plot failed: {e}")
