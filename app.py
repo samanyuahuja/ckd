@@ -190,8 +190,8 @@ if X_input_df is not None:
             fig_bar, ax_bar = plt.subplots(figsize=(10, 6))
             shap.plots.bar(shap_exp, show=False)
             st.pyplot(fig_bar)
-    except Exception as e:
-        st.error(f"Bar plot failed: {e}")
+        except Exception as e:
+            st.error(f"Bar plot failed: {e}")
 
 
     # ---------------- LIME ----------------
