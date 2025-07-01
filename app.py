@@ -11,11 +11,11 @@ from sklearn.inspection import PartialDependenceDisplay
 
 @st.cache_resource
 def load_resources():
-    model = joblib.load("model (12).pkl")
-    scaler = joblib.load("scaler (11).pkl")
+    model = joblib.load("model (14).pkl")
+    scaler = joblib.load("scaler (13).pkl")
 
     try:
-        X_train_scaled = joblib.load("X_train_scaled (6).pkl")
+        X_train_scaled = joblib.load("X_train_scaled (8).pkl")
     except Exception as e:
         st.warning(f"X_train_scaled failed to load: {e}")
         X_train_scaled = None
