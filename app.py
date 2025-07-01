@@ -173,16 +173,25 @@ if X_input_df is not None:
                 feature_names=X_input_df.columns
             )
     
+        
+
         # Waterfall plot
-        st.subheader("SHAP Waterfall Plot (Instance 0)")
-        shap.plots.waterfall(shap_exp[0])
-    
+        try:
+            st.subheader("SHAP Waterfall Plot (Instance 0)")
+            fig_wf, ax_wf = plt.subplots(figsize=(10, 6))
+            shap.plots.waterfall(shap_exp[0], show=False)
+            st.pyplot(fig_wf)
+        except Exception as e:
+            st.error(f"Waterfall plot failed: {e}")
+        
         # Summary bar plot
-        st.subheader("SHAP Summary Bar Plot")
-        shap.plots.bar(shap_exp)
-    
-    except Exception as e:
-        st.error(f"SHAP plot failed: {e}")
+        try:
+            st.subheader("SHAP Summary Bar Plot")
+            fig_bar, ax_bar = plt.subplots(figsize=(10, 6))
+            shap.plots.bar(shap_exp, show=False)
+            st.pyplot(fig_bar)
+        except Exception as e:
+            st.error(f"Bar plot failed: {e}")
 
 
     # ---------------- LIME ----------------
@@ -203,7 +212,7 @@ if X_input_df is not None:
     # ---------------- PDP ----------------
     st.subheader("📐 Partial Dependence Plot (PDP)")
     try:
-        feature = st.selectbox("Select feature for PDP", final_features)
+        feature = st.selectbox("Select feature for PDP", final_features, index=final_features.index("hemo"))
         pdp_data = X_train_scaled if X_train_scaled is not None else X_scaled
         fig_pdp, ax_pdp = plt.subplots()
         PartialDependenceDisplay.from_estimator(
