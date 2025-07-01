@@ -11,18 +11,27 @@ from sklearn.ensemble import RandomForestClassifier
 # ---------------- Load model, scaler, and optional training data ----------------
 
 @st.cache_resource
-def load_resources():
-    model = joblib.load("model.pkl")
-    scaler = joblib.load("scaler.pkl")
-    try:
-        X_train_scaled = joblib.load("X_train_scaled.pkl")
-    except:
-        X_train_scaled = None
-    return model, scaler, X_train_scaled
+    def load_resources():
+        model = joblib.load("model (6).pkl")
+        scaler = joblib.load("scaler (5).pkl")
+        try:
+            X_train_scaled = joblib.load("X_train_scaled.pkl")
+        except Exception as e:
+            st.warning(f"X_train_scaled failed to load: {e}")
+            X_train_scaled = None
+        return model, scaler, X_train_scaled
+    
+    model, scaler, X_train_scaled = load_resources()
+    
+    if X_train_scaled is None:
+        st.warning("⚠ X_train_scaled is missing. LIME and PDP may fail without it.")
+    else:
+        st.write("✅ X_train_scaled loaded. Shape:", X_train_scaled.shape)
+    
+    # Optional sanity check
+    st.write("✅ Model type:", type(model))
+    st.write("✅ Scaler feature_names_in_:", getattr(scaler, "feature_names_in_", "Not available"))
 
-model, scaler, X_train_scaled = load_resources()
-if X_train_scaled is None:
-    st.warning("X_train_scaled is missing. LIME and PDP may fail without it.")
 
 # ---------------- Define final features ----------------
 
