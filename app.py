@@ -164,7 +164,12 @@ if X_input_df is not None:
 
     
     # If model is multi-output, extract class 1 SHAP values
-    if isinstance(shap_values.values, list):
+    if isinstance(shap_values, list):
+        st.write("SHAP returned list with length:", len(shap_values))
+        st.write("SHAP[1] shape (positive class):", np.shape(shap_values[1]))
+    else:
+        st.write("SHAP returned Explanation, shape:", shap_values.values.shape)
+
         # SHAP returned list of arrays, multi-class model
         shap_values_class1 = shap_values[:, :, 1]
     else:
