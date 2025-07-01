@@ -6,7 +6,6 @@ import lime.lime_tabular
 import matplotlib.pyplot as plt
 import joblib
 from sklearn.inspection import PartialDependenceDisplay
-from sklearn.ensemble import RandomForestClassifier
 
 # ---------------- Load model, scaler, and optional training data ----------------
 
@@ -28,10 +27,8 @@ if X_train_scaled is None:
 else:
     st.write("✅ X_train_scaled loaded. Shape:", X_train_scaled.shape)
 
-# Optional sanity check
 st.write("✅ Model type:", type(model))
 st.write("✅ Scaler feature_names_in_:", getattr(scaler, "feature_names_in_", "Not available"))
-
 
 # ---------------- Define final features ----------------
 
@@ -139,14 +136,8 @@ else:
 # ---------------- Prediction + Explainability ----------------
 
 if X_input_df is not None:
-    if X_input_df.shape[1] != len(scaler.feature_names_in_):
-        st.warning("Scaler has no feature names. Ensure scaler was fit on DataFrame with correct columns.")
-        st.write("X_input_df columns being used for scaling:", X_input_df.columns.tolist())
-
-        st.error("Mismatch in number of features expected by scaler.")
-        st.stop()
-
     X_scaled = scaler.transform(X_input_df)
+
     prediction = model.predict(X_scaled)
     proba = model.predict_proba(X_scaled)[:, 1]
 
@@ -157,59 +148,43 @@ if X_input_df is not None:
     else:
         st.write("Predictions:", prediction.tolist())
         st.write("Probabilities:", proba.tolist())
-    st.write("Scaler feature_names_in_:", getattr(scaler, 'feature_names_in_', 'MISSING'))
-    st.write("Model type:", type(model))
-    st.write("Scaler features:", scaler.feature_names_in_)
-    st.write("Input features:", X_input_df.columns.tolist())
-    st.write("Input shape:", X_input_df.shape)
-    st.write("Prediction test:", model.predict(X_input_df))
+
     # ---------------- SHAP ----------------
     st.subheader("📊 SHAP Explanation")
-    
+
     explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(X_scaled)  # Pass scaled data for RandomForest
+    shap_values = explainer.shap_values(X_scaled)
 
-
-
-    
-    # If model is multi-output, extract class 1 SHAP values
-    if isinstance(shap_values, list):
-        st.write("SHAP returned list with length:", len(shap_values))
-        st.write("SHAP[1] shape (positive class):", np.shape(shap_values[1]))
-    else:
-        st.write("SHAP returned Explanation, shape:", shap_values.values.shape)
-
-        # SHAP returned list of arrays, multi-class model
-        shap_values_class1 = shap_values[:, :, 1]
-
-    
-    # ✅ Waterfall for first instance, class 1
-    # Waterfall
     try:
         st.subheader("SHAP Waterfall Plot (Instance 0)")
-        shap.plots.waterfall(shap.Explanation(values=shap_values[1][0],
-                                      base_values=explainer.expected_value[1],
-                                      data=X_input_df.iloc[0],
-                                      feature_names=X_input_df.columns.tolist()))
-  # class 1 SHAP values
-
+        if isinstance(shap_values, list):
+            shap.plots.waterfall(shap.Explanation(
+                values=shap_values[1][0],
+                base_values=explainer.expected_value[1],
+                data=X_input_df.iloc[0],
+                feature_names=X_input_df.columns.tolist()
+            ))
+        else:
+            shap.plots.waterfall(shap_values[0])
     except Exception as e:
         st.error(f"Waterfall plot failed: {e}")
-    
-    # Summary
+
     try:
         st.subheader("SHAP Summary Bar Plot")
-        shap.plots.bar(shap_values[:, :, 1])
-
+        if isinstance(shap_values, list):
+            shap.plots.bar(shap_values[1])
+        else:
+            shap.plots.bar(shap_values)
     except Exception as e:
         st.error(f"Bar plot failed: {e}")
 
-    st.write("SHAP raw values:", shap_values.values)
-    st.write("SHAP shape:", np.shape(shap_values.values))
+    # Debug SHAP output
+    if hasattr(shap_values, 'values'):
+        st.write("SHAP raw values:", shap_values.values)
+        st.write("SHAP shape:", np.shape(shap_values.values))
+    else:
+        st.write("SHAP values type: list, shape class 1:", np.shape(shap_values[1]))
 
-    st.write("SHAP values base_value:", shap_values[0].base_values)
-    st.write("SHAP values values:", shap_values[0].values)
-    st.write("SHAP values data:", shap_values[0].data)
     # ---------------- LIME ----------------
     st.subheader("🟢 LIME Explanation")
     try:
@@ -234,7 +209,7 @@ if X_input_df is not None:
         PartialDependenceDisplay.from_estimator(
             model,
             pdp_data,
-            features=[final_features.index(feature)],
+            features=[feature],
             ax=ax_pdp,
             feature_names=final_features
         )
