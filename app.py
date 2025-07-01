@@ -192,7 +192,8 @@ if X_input_df is not None:
             st.pyplot(fig_bar)
         except Exception as e:
             st.error(f"Bar plot failed: {e}")
-
+    except Exception as e:
+        st.error(f"SHAP plot failed: {e}")
 
     # ---------------- LIME ----------------
     st.subheader("🟢 LIME Explanation")
