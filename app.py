@@ -30,8 +30,8 @@ else:
 
 st.write("Scaler mean_:", scaler.mean_)
 st.write("Scaler var_:", scaler.var_)
-st.write("Scaler features:", scaler.feature_names_in_)
-st.write("Input features:", X_input.columns.tolist())
+
+
 
 # ---------------- Define final features ----------------
 
@@ -137,6 +137,8 @@ else:
 # ---------------- Prediction + Explainability ----------------
 
 if X_input_df is not None:
+    st.write("⚡ Scaler features:", scaler.feature_names_in_.tolist())
+    st.write("⚡ Input features:", X_input_df.columns.tolist())
     X_scaled = scaler.transform(X_input_df)
 
     prediction = model.predict(X_scaled)
