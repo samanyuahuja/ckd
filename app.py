@@ -139,21 +139,30 @@ else:
 # ---------------- Prediction + Explainability ----------------
 
 if X_input_df is not None:
-    st.write("⚡ Scaler features:", scaler.feature_names_in_.tolist())
-    st.write("⚡ Input features:", X_input_df.columns.tolist())
-    X_scaled = scaler.transform(X_input_df)
-    # 🔍 Debug info: Scaler expectations
-    debug_info = []
-    debug_info.append("==== DEBUG INFO ====")
-    debug_info.append(f"Scaler features: {scaler.feature_names_in_.tolist()}")
-    debug_info.append(f"Input features: {X_input_df.columns.tolist()}")
-    debug_info.append(f"Scaler mean_: {scaler.mean_.tolist()}")
-    debug_info.append(f"Scaler var_: {scaler.var_.tolist()}")
-    debug_info.append(f"X_scaled first row: {X_scaled[0].tolist()}")
+    # 🔍 Show initial features
+    st.write("⚡ Scaler expects features:", scaler.feature_names_in_.tolist())
+    st.write("⚡ Input provided features:", X_input_df.columns.tolist())
     
-    for line in debug_info:
-        st.write(line)
-    #test over
+    # Align input features to match scaler
+    for col in scaler.feature_names_in_:
+        if col not in X_input_df.columns:
+            st.warning(f"⚠ Adding missing column: {col}")
+            X_input_df[col] = 0
+    extra_cols = [col for col in X_input_df.columns if col not in scaler.feature_names_in_]
+    if extra_cols:
+        st.warning(f"⚠ Dropping extra columns: {extra_cols}")
+        X_input_df = X_input_df.drop(columns=extra_cols)
+
+    # Reorder to match scaler
+    X_input_df = X_input_df[scaler.feature_names_in_]
+
+    # ✅ Now safe to transform
+    X_scaled = scaler.transform(X_input_df)
+
+    # 🔍 Debug
+    st.write("✅ Columns aligned. First scaled row:", X_scaled[0].tolist())
+
+    # Predict
     prediction = model.predict(X_scaled)
     proba = model.predict_proba(X_scaled)[:, 1]
 
@@ -163,7 +172,8 @@ if X_input_df is not None:
         st.write("Probability:", round(proba[0], 3))
     else:
         st.write("Predictions:", prediction.tolist())
-        st.write("Probabilities:", proba.tolist())
+        st.write("Probabilities:", [round(p, 3) for p in proba.tolist()])
+
 
     # ---------------- SHAP ----------------
     st.subheader("📊 SHAP Explanation")
