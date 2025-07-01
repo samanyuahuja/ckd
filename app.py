@@ -154,36 +154,36 @@ if X_input_df is not None:
 
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_scaled)
-
+    
     try:
-        st.subheader("SHAP Waterfall Plot (Instance 0)")
         if isinstance(shap_values, list):
-            shap.plots.waterfall(shap.Explanation(
-                values=shap_values[1][0],
+            # Multi-class model, use class 1
+            shap_exp = shap.Explanation(
+                values=shap_values[1],
                 base_values=explainer.expected_value[1],
-                data=X_input_df.iloc[0],
-                feature_names=X_input_df.columns.tolist()
-            ))
+                data=X_scaled,
+                feature_names=X_input_df.columns
+            )
         else:
-            shap.plots.waterfall(shap_values[0])
-    except Exception as e:
-        st.error(f"Waterfall plot failed: {e}")
-
-    try:
+            # Binary model or Explanation returned
+            shap_exp = shap.Explanation(
+                values=shap_values,
+                base_values=explainer.expected_value,
+                data=X_scaled,
+                feature_names=X_input_df.columns
+            )
+    
+        # Waterfall plot
+        st.subheader("SHAP Waterfall Plot (Instance 0)")
+        shap.plots.waterfall(shap_exp[0])
+    
+        # Summary bar plot
         st.subheader("SHAP Summary Bar Plot")
-        if isinstance(shap_values, list):
-            shap.plots.bar(shap_values[1])
-        else:
-            shap.plots.bar(shap_values)
+        shap.plots.bar(shap_exp)
+    
     except Exception as e:
-        st.error(f"Bar plot failed: {e}")
+        st.error(f"SHAP plot failed: {e}")
 
-    # Debug SHAP output
-    if hasattr(shap_values, 'values'):
-        st.write("SHAP raw values:", shap_values.values)
-        st.write("SHAP shape:", np.shape(shap_values.values))
-    else:
-        st.write("SHAP values type: list, shape class 1:", np.shape(shap_values[1]))
 
     # ---------------- LIME ----------------
     st.subheader("🟢 LIME Explanation")
