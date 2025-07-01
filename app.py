@@ -176,22 +176,22 @@ if X_input_df is not None:
         
 
         # Waterfall plot
-        try:
-            st.subheader("SHAP Waterfall Plot (Instance 0)")
-            fig_wf, ax_wf = plt.subplots(figsize=(10, 6))
-            shap.plots.waterfall(shap_exp[0], show=False)
-            st.pyplot(fig_wf)
-        except Exception as e:
-            st.error(f"Waterfall plot failed: {e}")
+    try:
+        st.subheader("SHAP Waterfall Plot (Instance 0)")
+        fig_wf, ax_wf = plt.subplots(figsize=(10, 6))
+        shap.plots.waterfall(shap_exp[0], show=False)
+        st.pyplot(fig_wf)
+    except Exception as e:
+        st.error(f"Waterfall plot failed: {e}")
         
         # Summary bar plot
-        try:
-            st.subheader("SHAP Summary Bar Plot")
-            fig_bar, ax_bar = plt.subplots(figsize=(10, 6))
-            shap.plots.bar(shap_exp, show=False)
-            st.pyplot(fig_bar)
-        except Exception as e:
-            st.error(f"Bar plot failed: {e}")
+    try:
+        st.subheader("SHAP Summary Bar Plot")
+        fig_bar, ax_bar = plt.subplots(figsize=(10, 6))
+        shap.plots.bar(shap_exp, show=False)
+        st.pyplot(fig_bar)
+    except Exception as e:
+        st.error(f"Bar plot failed: {e}")
 
 
     # ---------------- LIME ----------------
