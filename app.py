@@ -13,6 +13,8 @@ from sklearn.inspection import PartialDependenceDisplay
 def load_resources():
     model = joblib.load("model (11).pkl")
     scaler = joblib.load("scaler (10).pkl")
+    st.write("Scaler features:", scaler.feature_names_in_)
+    st.write("Input features:", X_input.columns.tolist())
     try:
         X_train_scaled = joblib.load("X_train_scaled (5).pkl")
     except Exception as e:
