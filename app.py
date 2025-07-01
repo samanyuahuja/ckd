@@ -172,9 +172,7 @@ if X_input_df is not None:
 
         # SHAP returned list of arrays, multi-class model
         shap_values_class1 = shap_values[:, :, 1]
-    else:
-        # Binary, single output
-        shap_values_class1 = shap_values
+
     
     # ✅ Waterfall for first instance, class 1
     # Waterfall
