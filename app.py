@@ -152,6 +152,8 @@ if X_input_df is not None:
     
     # Show in Streamlit in text area so you can easily copy
     st.text_area("🔍 Debug Output (copy this for ChatGPT)", debug_text, height=200)
+    debug_info.append(f"Scaler mean_: {scaler.mean_.tolist()}")
+    debug_info.append(f"Scaler var_: {scaler.var_.tolist()}")
     #test over
     prediction = model.predict(X_scaled)
     proba = model.predict_proba(X_scaled)[:, 1]
