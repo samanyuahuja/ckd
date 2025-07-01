@@ -147,8 +147,9 @@ if X_input_df is not None:
     # ---------------- SHAP ----------------
     st.subheader("📊 SHAP Explanation")
     
-    explainer = shap.Explainer(model, X_scaled)
-    shap_values = explainer(X_scaled)
+    explainer = shap.Explainer(model, X_input_df)
+    shap_values = explainer(X_input_df)
+
     
     # If model is multi-output, extract class 1 SHAP values
     if isinstance(shap_values.values, list):
@@ -159,18 +160,20 @@ if X_input_df is not None:
         shap_values_class1 = shap_values
     
     # ✅ Waterfall for first instance, class 1
+    # Waterfall
     try:
         st.subheader("SHAP Waterfall Plot (Instance 0)")
-        shap.plots.waterfall(shap_values_class1[0])
+        shap.plots.waterfall(shap_values[0])
     except Exception as e:
         st.error(f"Waterfall plot failed: {e}")
     
-    # ✅ Summary bar plot
+    # Summary
     try:
         st.subheader("SHAP Summary Bar Plot")
-        shap.plots.bar(shap_values_class1)
+        shap.plots.bar(shap_values)
     except Exception as e:
         st.error(f"Bar plot failed: {e}")
+
 
     st.write("SHAP values base_value:", shap_values[0].base_values)
     st.write("SHAP values values:", shap_values[0].values)
