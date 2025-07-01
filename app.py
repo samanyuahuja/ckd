@@ -199,12 +199,12 @@ if X_input_df is not None:
     st.subheader("🟢 LIME Explanation")
     try:
         lime_explainer = lime.lime_tabular.LimeTabularExplainer(
-            training_data=X_train_scaled if X_train_scaled is not None else X_scaled,
-            feature_names=final_features,
-            class_names=["No CKD", "CKD"],
-            mode="classification"
-        )
-        lime_exp = lime_explainer.explain_instance(X_scaled[0], model.predict_proba, num_features=10)
+        training_data=X_train_scaled if X_train_scaled is not None else X_scaled,
+        feature_names=final_features,
+        class_names=["No CKD", "CKD"],
+        mode="classification"
+    )
+    lime_exp = lime_explainer.explain_instance(X_scaled[0], model.predict_proba, num_features=10)
         fig_lime = lime_exp.as_pyplot_figure()
         st.pyplot(fig_lime)
     except Exception as e:
