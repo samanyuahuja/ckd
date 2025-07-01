@@ -27,8 +27,7 @@ if X_train_scaled is None:
 else:
     st.write("✅ X_train_scaled loaded. Shape:", X_train_scaled.shape)
 
-st.write("✅ Model type:", type(model))
-st.write("✅ Scaler feature_names_in_:", getattr(scaler, "feature_names_in_", "Not available"))
+
 
 # ---------------- Define final features ----------------
 
