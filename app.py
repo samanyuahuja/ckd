@@ -143,7 +143,7 @@ if X_input_df is not None:
     else:
         st.write("Predictions:", prediction.tolist())
         st.write("Probabilities:", proba.tolist())
-        
+    st.write("Scaler feature_names_in_:", getattr(scaler, 'feature_names_in_', 'MISSING'))
     st.write("Model type:", type(model))
     st.write("Scaler features:", scaler.feature_names_in_)
     st.write("Input features:", X_input_df.columns.tolist())
