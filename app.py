@@ -143,7 +143,12 @@ if X_input_df is not None:
     else:
         st.write("Predictions:", prediction.tolist())
         st.write("Probabilities:", proba.tolist())
-
+        
+    st.write("Model type:", type(model))
+    st.write("Scaler features:", scaler.feature_names_in_)
+    st.write("Input features:", X_input_df.columns.tolist())
+    st.write("Input shape:", X_input_df.shape)
+    st.write("Prediction test:", model.predict(X_input_df))
     # ---------------- SHAP ----------------
     st.subheader("📊 SHAP Explanation")
     
