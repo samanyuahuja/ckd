@@ -203,10 +203,10 @@ if X_input_df is not None:
         feature_names=final_features,
         class_names=["No CKD", "CKD"],
         mode="classification"
-    )
-    lime_exp = lime_explainer.explain_instance(X_scaled[0], model.predict_proba, num_features=10)
-        fig_lime = lime_exp.as_pyplot_figure()
-        st.pyplot(fig_lime)
+        )
+        lime_exp = lime_explainer.explain_instance(X_scaled[0], model.predict_proba, num_features=10)
+            fig_lime = lime_exp.as_pyplot_figure()
+            st.pyplot(fig_lime)
     except Exception as e:
         st.error(f"LIME Error: {e}")
 
