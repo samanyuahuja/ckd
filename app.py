@@ -60,9 +60,7 @@ def preprocess_input(df):
     df["high_creatinine"] = (df["sc"] > 1.2).astype(int)
     df["hemo_bu"] = df["hemo"] * df["bu"]
 
-    # Apply log1p to skewed features
-    for col in ['sc', 'bu', 'bgr', 'wbcc', 'rbcc']:
-        df[col] = np.log1p(df[col])
+   
 
     for col in final_features:
         if col not in df.columns:
