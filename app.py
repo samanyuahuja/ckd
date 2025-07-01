@@ -21,6 +21,8 @@ def load_resources():
     return model, scaler, X_train_scaled
 
 model, scaler, X_train_scaled = load_resources()
+if X_train_scaled is None:
+    st.warning("X_train_scaled is missing. LIME and PDP may fail without it.")
 
 # ---------------- Define final features ----------------
 
@@ -129,6 +131,9 @@ else:
 
 if X_input_df is not None:
     if X_input_df.shape[1] != len(scaler.feature_names_in_):
+        st.warning("Scaler has no feature names. Ensure scaler was fit on DataFrame with correct columns.")
+        st.write("X_input_df columns being used for scaling:", X_input_df.columns.tolist())
+
         st.error("Mismatch in number of features expected by scaler.")
         st.stop()
 
@@ -152,8 +157,9 @@ if X_input_df is not None:
     # ---------------- SHAP ----------------
     st.subheader("📊 SHAP Explanation")
     
-    explainer = shap.Explainer(model, X_input_df)
-    shap_values = explainer(X_input_df)
+    explainer = shap.Explainer(model, X_scaled)
+    shap_values = explainer(X_scaled)
+
 
     
     # If model is multi-output, extract class 1 SHAP values
@@ -168,17 +174,21 @@ if X_input_df is not None:
     # Waterfall
     try:
         st.subheader("SHAP Waterfall Plot (Instance 0)")
-        shap.plots.waterfall(shap_values[0])
+        shap.plots.waterfall(shap_values[0, :, 1])  # class 1 SHAP values
+
     except Exception as e:
         st.error(f"Waterfall plot failed: {e}")
     
     # Summary
     try:
         st.subheader("SHAP Summary Bar Plot")
-        shap.plots.bar(shap_values)
+        shap.plots.bar(shap_values[:, :, 1])
+
     except Exception as e:
         st.error(f"Bar plot failed: {e}")
 
+    st.write("SHAP raw values:", shap_values.values)
+    st.write("SHAP shape:", np.shape(shap_values.values))
 
     st.write("SHAP values base_value:", shap_values[0].base_values)
     st.write("SHAP values values:", shap_values[0].values)
