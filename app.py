@@ -13,9 +13,9 @@ from sklearn.inspection import PartialDependenceDisplay
 def load_resources(model_choice="rf"):
     # Load the model
     if model_choice == "rf":
-        model = joblib.load("Rf_model.pkl")
+        model = joblib.load("rf_model.pkl")
     elif model_choice == "logistic":
-        model = joblib.load("Logistic_model.pkl")
+        model = joblib.load("logistic_model.pkl")
     else:
         st.error("❌ Unknown model choice!")
         st.stop()
