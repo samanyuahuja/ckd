@@ -144,9 +144,19 @@ else:
 
 if X_input_df is not None:
     # 🔍 Show initial features
-    st.write("⚡ Scaler expects features:", scaler.feature_names_in_.tolist())
-    st.write("⚡ Input provided features:", X_input_df.columns.tolist())
+    # 🔍 Debug before scaling
+    debug_info = []
+    debug_info.append("==== SCALER & INPUT DEBUG ====")
+    debug_info.append(f"⚡ Scaler expects features: {scaler.feature_names_in_.tolist()}")
+    debug_info.append(f"⚡ Input provided features: {X_input_df.columns.tolist()}")
+    debug_info.append(f"✅ Input values before scaling: {X_input_df.iloc[0].to_dict()}")
+    debug_info.append(f"✅ Scaler mean_: {scaler.mean_.tolist()}")
+    debug_info.append(f"✅ Scaler var_: {scaler.var_.tolist()}")
     
+    # Show in Streamlit
+    for line in debug_info:
+        st.write(line)
+        
     # Align input features to match scaler
     for col in scaler.feature_names_in_:
         if col not in X_input_df.columns:
