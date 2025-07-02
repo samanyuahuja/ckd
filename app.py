@@ -10,26 +10,36 @@ from sklearn.inspection import PartialDependenceDisplay
 # ---------------- Load model, scaler, and optional training data ----------------
 
 @st.cache_resource
-def load_resources():
-    model = joblib.load("model (17).pkl")
-    scaler = joblib.load("scaler (16).pkl")
+def load_resources(model_choice="rf"):
+    if model_choice == "rf":
+        model = joblib.load("rf_model.pkl")
+    elif model_choice == "logistic":
+        model = joblib.load("logistic_model.pkl")
+    else:
+        st.error("❌ Unknown model choice!")
+        st.stop()
+    
+    scaler = joblib.load("scaler (18).pkl")
 
     try:
-        X_train_scaled = joblib.load("X_train_scaled (11).pkl")
+        X_train_scaled = joblib.load("X_train_res.pkl")
     except Exception as e:
-        st.warning(f"X_train_scaled failed to load: {e}")
+        st.warning(f"⚠ X_train_res failed to load: {e}")
         X_train_scaled = None
+    
     return model, scaler, X_train_scaled
 
-model, scaler, X_train_scaled = load_resources()
+# Example: load the Random Forest
+model, scaler, X_train_scaled = load_resources(model_choice="rf")
 
+# Feedback for user
 if X_train_scaled is None:
-    st.warning("⚠ X_train_scaled is missing. LIME and PDP may fail without it.")
+    st.warning("⚠ X_train_res is missing. LIME and PDP may fail without it.")
 else:
-    st.write("✅ X_train_scaled loaded. Shape:", X_train_scaled.shape)
+    st.write("✅ X_train_res loaded. Shape:", X_train_scaled.shape)
 
-st.write("Scaler mean_:", scaler.mean_)
-st.write("Scaler var_:", scaler.var_)
+st.write("✅ Scaler mean_:", scaler.mean_)
+st.write("✅ Scaler var_:", scaler.var_)
 
 
 
@@ -240,7 +250,7 @@ if X_input_df is not None:
     st.subheader("🟢 LIME Explanation")
     try:
         lime_explainer = lime.lime_tabular.LimeTabularExplainer(
-            training_data=X_train_scaled if X_train_scaled is not None else X_scaled,
+            training_data=X_train_res if X_train_res is not None else X_scaled,
             feature_names=final_features,
             class_names=["No CKD", "CKD"],
             mode="classification"
@@ -262,7 +272,7 @@ if X_input_df is not None:
     st.subheader("📐 Partial Dependence Plot (PDP)")
     try:
         feature = st.selectbox("Select feature for PDP", final_features, index=final_features.index("hemo"))
-        pdp_data = X_train_scaled if X_train_scaled is not None else X_scaled
+        pdp_data = X_train_res if X_train_res is not None else X_scaled
         fig_pdp, ax_pdp = plt.subplots()
         PartialDependenceDisplay.from_estimator(
             model,
