@@ -21,7 +21,7 @@ def load_resources(model_choice="rf"):
         st.stop()
     
     # Load the scaler
-    scaler = joblib.load("scaler_18.pkl")  # clean filename
+    scaler = joblib.load("scaler (18).pkl")  # clean filename
     
     # Load X_train_res
     try:
