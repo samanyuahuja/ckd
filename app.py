@@ -11,35 +11,38 @@ from sklearn.inspection import PartialDependenceDisplay
 
 @st.cache_resource
 def load_resources(model_choice="rf"):
+    # Load the model
     if model_choice == "rf":
-        model = joblib.load("rf_model.pkl")
+        model = joblib.load("Rf_model.pkl")
     elif model_choice == "logistic":
-        model = joblib.load("logistic_model.pkl")
+        model = joblib.load("Logistic_model.pkl")
     else:
         st.error("❌ Unknown model choice!")
         st.stop()
     
-    scaler = joblib.load("scaler (18).pkl")
-
+    # Load the scaler
+    scaler = joblib.load("scaler_18.pkl")  # clean filename
+    
+    # Load X_train_res
     try:
-        X_train_scaled = joblib.load("X_train_res.pkl")
+        X_train_res = joblib.load("X_train_res.pkl")
     except Exception as e:
         st.warning(f"⚠ X_train_res failed to load: {e}")
-        X_train_scaled = None
+        X_train_res = None
     
-    return model, scaler, X_train_scaled
+    return model, scaler, X_train_res
 
-# Example: load the Random Forest
-model, scaler, X_train_scaled = load_resources(model_choice="rf")
+# Example: load Random Forest
+model, scaler, X_train_res = load_resources(model_choice="rf")
 
 # Feedback for user
-if X_train_scaled is None:
+if X_train_res is None:
     st.warning("⚠ X_train_res is missing. LIME and PDP may fail without it.")
 else:
-    st.write("✅ X_train_res loaded. Shape:", X_train_scaled.shape)
+    st.write("✅ X_train_res loaded. Shape:", X_train_res.shape)
 
-st.write("✅ Scaler mean_:", scaler.mean_)
-st.write("✅ Scaler var_:", scaler.var_)
+st.write("✅ Scaler mean_:", scaler.mean_.tolist())
+st.write("✅ Scaler var_:", scaler.var_.tolist())
 
 
 
