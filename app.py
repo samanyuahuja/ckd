@@ -11,11 +11,11 @@ from sklearn.inspection import PartialDependenceDisplay
 
 @st.cache_resource
 def load_resources():
-    model = joblib.load("model (14).pkl")
-    scaler = joblib.load("scaler (13).pkl")
+    model = joblib.load("model (17).pkl")
+    scaler = joblib.load("scaler (16).pkl")
 
     try:
-        X_train_scaled = joblib.load("X_train_scaled (8).pkl")
+        X_train_scaled = joblib.load("X_train_scaled (11).pkl")
     except Exception as e:
         st.warning(f"X_train_scaled failed to load: {e}")
         X_train_scaled = None
@@ -38,9 +38,9 @@ st.write("Scaler var_:", scaler.var_)
 # ---------------- Define final features ----------------
 
 final_features = [
-    'age', 'bp', 'sg', 'al', 'su', 'rbc', 'pc', 'pcc', 'bgr', 'bu', 'sc',
+    'age', 'bp', 'sg', 'al', 'su', 'rbc', 'pc', 'bgr', 'bu', 'sc',
     'sod', 'pot', 'hemo', 'wbcc', 'rbcc', 'htn', 'dm', 'appet', 'pe',
-    'bun_sc_ratio', 'high_creatinine', 'hemo_bu'
+    'ane', 'bun_sc_ratio', 'high_creatinine', 'hemo_bu'
 ]
 
 # ---------------- Preprocessing function ----------------
@@ -48,7 +48,7 @@ final_features = [
 def preprocess_input(df):
     mapper = {"normal": 0, "abnormal": 1, "present": 1, "notpresent": 0,
               "yes": 1, "no": 0, "good": 0, "poor": 1}
-    categorical_cols = ['rbc', 'pc', 'pcc', 'ba', 'htn', 'dm', 'appet', 'pe']
+    categorical_cols = ['rbc', 'pc', 'ba', 'htn', 'dm', 'appet', 'pe', 'ane']
 
     for col in categorical_cols:
         if col in df.columns:
@@ -94,10 +94,12 @@ else:
 
     default = {
         'age': 45, 'bp': 80, 'sg': 1.015, 'al': 1, 'su': 0, 'rbc': 'normal',
-        'pc': 'normal', 'pcc': 'notpresent', 'ba': 'notpresent', 'bgr': 150,
+        'pc': 'normal', 'ba': 'notpresent', 'bgr': 150,
         'bu': 50, 'sc': 1.5, 'sod': 140, 'pot': 4.5, 'hemo': 12.0, 'wbcc': 7000,
-        'rbcc': 4.5, 'htn': 'no', 'dm': 'no', 'appet': 'good', 'pe': 'no'
+        'rbcc': 4.5, 'htn': 'no', 'dm': 'no', 'appet': 'good', 'pe': 'no',
+        'ane': 'no'   # ✅ Add ane (defaulting to 'no' or your preferred default)
     }
+
 
     with st.form("manual_input"):
         cols = st.columns(3)
@@ -112,22 +114,24 @@ else:
             inputs['pc'] = st.selectbox("Pus Cell", ["normal", "abnormal"])
 
         with cols[1]:
-            inputs['pcc'] = st.selectbox("Pus Cell Clumps", ["present", "notpresent"])
+            
             inputs['ba'] = st.selectbox("Bacteria", ["present", "notpresent"])
             inputs['bgr'] = st.number_input("Blood Glucose Random", value=default['bgr'])
             inputs['bu'] = st.number_input("Blood Urea", value=default['bu'])
             inputs['sc'] = st.number_input("Serum Creatinine", value=default['sc'])
             inputs['sod'] = st.number_input("Sodium", value=default['sod'])
             inputs['pot'] = st.number_input("Potassium", value=default['pot'])
-
-        with cols[2]:
             inputs['hemo'] = st.number_input("Hemoglobin", value=default['hemo'])
+        with cols[2]:
+            
             inputs['wbcc'] = st.number_input("WBC Count", value=default['wbcc'])
             inputs['rbcc'] = st.number_input("RBC Count", value=default['rbcc'])
             inputs['htn'] = st.selectbox("Hypertension", ["yes", "no"])
             inputs['dm'] = st.selectbox("Diabetes Mellitus", ["yes", "no"])
             inputs['appet'] = st.selectbox("Appetite", ["good", "poor"])
             inputs['pe'] = st.selectbox("Pedal Edema", ["yes", "no"])
+            inputs['ane'] = st.selectbox("Anemia", ["yes", "no"])
+
 
         submit = st.form_submit_button("Predict")
 
