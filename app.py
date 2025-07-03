@@ -264,14 +264,32 @@ if X_input_df is not None:
     else:
         st.write("Predictions:", prediction.tolist())
         st.write("Probabilities:", [round(p, 3) for p in proba.tolist()])
+    # === Top Feature Importance (Beautiful Section) ===
     if hasattr(model, "feature_importances_"):
         feat_imp = dict(zip(scaler.feature_names_in_, model.feature_importances_))
         top_feats = sorted(feat_imp.items(), key=lambda x: -x[1])[:5]
-        st.write("🔑 Top model features & importance:", top_feats)
+    
+        st.markdown("""
+        <div style='background-color: #f0f0f0; padding: 15px; border-radius: 8px; border: 1px solid #ccc;'>
+            <h4 style='color: black; margin-bottom: 10px;'>🔹 Top Model Feature Importances</h4>
+        </div>
+        """, unsafe_allow_html=True)
+    
+        for feat, val in top_feats:
+            st.markdown(f"<div style='color:black; font-size: 16px;'>• <b>{feat}</b>: {val:.3f}</div>", unsafe_allow_html=True)
+    
     elif hasattr(model, "coef_"):
         coefs = dict(zip(scaler.feature_names_in_, model.coef_[0]))
         top_feats = sorted(coefs.items(), key=lambda x: -abs(x[1]))[:5]
-        st.write("🔑 Top model features & coefficients:", top_feats)
+    
+        st.markdown("""
+        <div style='background-color: #f0f0f0; padding: 15px; border-radius: 8px; border: 1px solid #ccc;'>
+            <h4 style='color: black; margin-bottom: 10px;'>🔹 Top Model Coefficients</h4>
+        </div>
+        """, unsafe_allow_html=True)
+    
+        for feat, val in top_feats:
+            st.markdown(f"<div style='color:black; font-size: 16px;'>• <b>{feat}</b>: {val:.3f}</div>", unsafe_allow_html=True)
     # 📝 Professional CKD Report
     # Compute no CKD probability
     no_ckd_proba = 1 - proba[0]
