@@ -185,11 +185,11 @@ else:
 
 
     with st.container():
-    st.markdown("""
-    <div style='background-color: #f0f0f0; padding: 15px; border-radius: 6px; border: 1px solid #ccc;'>
-        <h4 style='color: black; margin: 0;'>🔹 Manually Enter Your Medical Information</h4>
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown("""
+        <div style='background-color: #f0f0f0; padding: 15px; border-radius: 6px; border: 1px solid #ccc;'>
+            <h4 style='color: black; margin: 0;'>🔹 Manually Enter Your Medical Information</h4>
+        </div>
+        """, unsafe_allow_html=True)
 
     with st.form("manual_input"):
         cols = st.columns(3)
