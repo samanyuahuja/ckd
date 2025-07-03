@@ -226,6 +226,35 @@ if X_input_df is not None:
         coefs = dict(zip(scaler.feature_names_in_, model.coef_[0]))
         top_feats = sorted(coefs.items(), key=lambda x: -abs(x[1]))[:5]
         st.write("🔑 Top model features & coefficients:", top_feats)
+    # 📝 Professional CKD Report
+    if len(prediction) == 1:
+        if prediction[0] == 0 and proba[0] >= 0.75:
+            st.success("🟢 CKD Unlikely — The model predicts no CKD with high confidence.")
+            st.markdown(f"""
+            ### 📝 CKD Risk Report  
+            ✅ **Prediction:** No Chronic Kidney Disease detected.  
+            ✅ **Confidence:** {round(proba[0], 3)} probability of no CKD.  
+            ✅ **Top contributing healthy indicators:**  
+            """)
+            
+            # List top SHAP features that push toward no CKD
+            try:
+                if isinstance(shap_values, list):
+                    shap_contribs = shap_values[1][0]
+                else:
+                    shap_contribs = shap_values[0]
+                
+                top_negative = sorted(
+                    zip(X_input_df.columns, shap_contribs),
+                    key=lambda x: x[1]
+                )[:3]
+                
+                for feat, val in top_negative:
+                    st.write(f"• {feat}: contributed toward no CKD")
+            except Exception as e:
+                st.warning(f"Could not generate SHAP feature reasons: {e}")
+            
+            st.info("⚠ *Note: This is an AI model's prediction and should not replace medical advice. If you have any symptoms or concerns, please consult a healthcare provider.*")
 
     # ---------------- SHAP ----------------
     st.subheader("📊 SHAP Explanation")
