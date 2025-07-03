@@ -203,7 +203,7 @@ else:
             inputs['pc'] = st.selectbox("Pus Cell", ["normal", "abnormal"])
     
         with cols[1]:
-            inputs['ba'] = st.selectbox("Bacteria", ["present", "notpresent"])
+            inputs['ba'] = st.selectbox("Bacteria", ["present", "not present"])
             inputs['bgr'] = st.number_input("Blood Glucose Random", value=default['bgr'])
             inputs['bu'] = st.number_input("Blood Urea", value=default['bu'])
             inputs['sc'] = st.number_input("Serum Creatinine", value=default['sc'])
