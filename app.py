@@ -17,23 +17,28 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* Main background + text color */
+    /* Make main background white, text black */
     body, .stApp {
         background-color: #ffffff;
         color: #000000;
     }
 
-    /* Sidebar background */
+    /* Sidebar background light grey */
     section[data-testid="stSidebar"] {
         background-color: #f0f0f0;
     }
 
-    /* Widget labels (feature names, button text) */
+    /* Header text black */
+    h1, h2, h3, h4, h5, h6, .stMarkdown {
+        color: #000000 !important;
+    }
+
+    /* Widget labels, button text black */
     label, .stButton>button, .stSelectbox, .stNumberInput>div>input {
         color: #000000 !important;
     }
 
-    /* Button styling */
+    /* Button styles */
     .stButton>button {
         background-color: #f0f0f0;
         border: 1px solid #000000;
@@ -44,12 +49,20 @@ st.markdown(
         color: #000000;
     }
 
-    /* Slider track + thumb */
+    /* Slider track white inside black border */
     .stSlider > div[data-baseweb="slider"] > div {
-        background: #d0d0d0;
+        background: #ffffff;
+        border: 1px solid #000000;
     }
+
+    /* Slider thumb (dot) blue */
     .stSlider > div[data-baseweb="slider"] > div > div {
-        background: #0072C6 !important;  /* Mayo-style blue thumb */
+        background: #0072C6 !important;
+    }
+
+    /* Slider number (value shown) blue */
+    .stSlider .css-14g5z1l {  /* This class may change: test in your app */
+        color: #0072C6 !important;
     }
     </style>
     """,
