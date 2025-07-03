@@ -13,20 +13,48 @@ st.set_page_config(
     initial_sidebar_state="auto"
 )
 
-# Force light theme via CSS
+# Force light theme + custom styling
 st.markdown(
     """
     <style>
-    body {
-        background-color: #f9f9f9;
+    /* Main background + text color */
+    body, .stApp {
+        background-color: #ffffff;
         color: #000000;
     }
-    .stApp {
-        background-color: #ffffff;
+
+    /* Sidebar background */
+    section[data-testid="stSidebar"] {
+        background-color: #f0f0f0;
+    }
+
+    /* Widget labels (feature names, button text) */
+    label, .stButton>button, .stSelectbox, .stNumberInput>div>input {
+        color: #000000 !important;
+    }
+
+    /* Button styling */
+    .stButton>button {
+        background-color: #f0f0f0;
+        border: 1px solid #000000;
+        color: #000000;
+    }
+    .stButton>button:hover {
+        background-color: #e0e0e0;
+        color: #000000;
+    }
+
+    /* Slider track + thumb */
+    .stSlider > div[data-baseweb="slider"] > div {
+        background: #d0d0d0;
+    }
+    .stSlider > div[data-baseweb="slider"] > div > div {
+        background: #0072C6 !important;  /* Mayo-style blue thumb */
     }
     </style>
     """,
     unsafe_allow_html=True
+)
 )
 # ---------------- Load model, scaler, and optional training data ----------------
 
