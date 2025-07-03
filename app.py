@@ -83,20 +83,28 @@ st.markdown("""
 Welcome to the Chronic Kidney Disease Risk Predictor. This tool provides medical-grade insights to help assess your risk.  
 """)
 
-uploaded_file = st.file_uploader("Upload CSV file with required features", type=["csv"])
+st.markdown("### 🔹 Upload Your Medical Report (CSV Format)")
+uploaded_file = st.file_uploader(
+    label="Upload a CSV file containing your medical data.",
+    type=["csv"],
+    help="The file should include the required features like age, bp, sc, etc."
+)
+
 X_input_df = None
 
 if uploaded_file:
+    st.success("✅ File uploaded successfully!")
     try:
         df = pd.read_csv(uploaded_file)
         X_input_df = preprocess_input(df)
-        st.write("Uploaded Data Preview:", df.head())
+        st.markdown("### 📋 Uploaded Data Preview")
+        st.dataframe(df.head(), use_container_width=True)
     except Exception as e:
-        st.error(f"File read error: {e}")
+        st.error(f"❌ File read error: {e}")
         st.stop()
-
 else:
-    st.subheader("Manual Input")
+    st.markdown("### 🔹 Or Manually Enter Your Medical Information")
+    st.info("Please fill out the form below if you do not have a CSV file.")
 
     default = {
         'age': 45, 'bp': 80, 'al': 1, 'su': 0, 'rbc': 'normal',
