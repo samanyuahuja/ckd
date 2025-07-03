@@ -32,7 +32,7 @@ def load_resources(model_choice="rf"):
 # Example: load Random Forest
 model, scaler, X_train_res = load_resources(model_choice="rf")
 
-)
+
 
 
 
