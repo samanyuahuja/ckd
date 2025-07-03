@@ -41,22 +41,12 @@ st.markdown(
     .stButton>button:hover {
         background-color: #e0e0e0;
     }
-
-    /* Slider pipe white with black border */
-    .stSlider > div[data-baseweb="slider"] > div {
-        background: #ffffff !important;
-        border: 1px solid #000000;
+    /* Force all labels, markdown, and text elements to black */
+    label, .css-10trblm, .css-1cpxqw2, .stMarkdown, .stText, .stSubheader, .stHeader {
+        color: #000000 !important;
     }
 
-    /* Slider dot blue */
-    .stSlider > div[data-baseweb="slider"] > div > div {
-        background: #0072C6 !important;
-    }
-
-    /* Slider number above dot blue */
-    .stSlider span {
-        color: #0072C6 !important;
-    }
+ 
     </style>
     """,
     unsafe_allow_html=True
