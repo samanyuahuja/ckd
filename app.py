@@ -209,7 +209,14 @@ if X_input_df is not None:
     else:
         st.write("Predictions:", prediction.tolist())
         st.write("Probabilities:", [round(p, 3) for p in proba.tolist()])
-
+    if hasattr(model, "feature_importances_"):
+        feat_imp = dict(zip(scaler.feature_names_in_, model.feature_importances_))
+        top_feats = sorted(feat_imp.items(), key=lambda x: -x[1])[:5]
+        st.write("🔑 Top model features & importance:", top_feats)
+    elif hasattr(model, "coef_"):
+        coefs = dict(zip(scaler.feature_names_in_, model.coef_[0]))
+        top_feats = sorted(coefs.items(), key=lambda x: -abs(x[1]))[:5]
+        st.write("🔑 Top model features & coefficients:", top_feats)
 
     # ---------------- SHAP ----------------
     st.subheader("📊 SHAP Explanation")
