@@ -298,18 +298,18 @@ if X_input_df is not None:
         st.error(f"LIME Error: {e}")
     
     # ---------------- PDP ----------------
-    st.subheader("📐 Partial Dependence Plot (PDP)")
+    
 
     # Move selectbox outside plot logic so it just stores state
+    st.subheader("📐 Partial Dependence Plot (PDP)")
     feature = st.selectbox("Select feature for PDP", final_features, index=final_features.index("hemo"))
     
     if st.button("Generate PDP Plot"):
         try:
-            pdp_data = X_train_res if X_train_res is not None else X_scaled
             fig_pdp, ax_pdp = plt.subplots()
             PartialDependenceDisplay.from_estimator(
                 model,
-                pdp_data,
+                X_train_res,
                 features=[feature],
                 ax=ax_pdp,
                 feature_names=final_features
