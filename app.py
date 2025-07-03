@@ -56,7 +56,11 @@ st.markdown(
     .stSubheader, .stHeader {
         color: #000000 !important;
     }
- 
+    div.stAlert {
+        background-color: black;
+        color: white;
+        border: none;
+    }
     </style>
     """,
     unsafe_allow_html=True
