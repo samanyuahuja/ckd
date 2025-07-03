@@ -197,7 +197,7 @@ if X_input_df is not None:
     # 🚨 Validate X_scaled before prediction
     st.write("✅ X_scaled shape:", X_scaled.shape)
     st.write("✅ First row of X_scaled:", {col: round(val, 3) for col, val in zip(scaler.feature_names_in_, X_scaled[0])})
-    
+    st.write("✅ Any NaNs in X_scaled?", np.isnan(X_scaled).any())
     # Check for NaNs
     if np.isnan(X_scaled).any():
         st.error("❌ X_scaled contains NaN values! Please check your input data or preprocessing.")
