@@ -78,8 +78,10 @@ def preprocess_input(df):
     return df[final_features]
 
 # ---------------- Streamlit App UI ----------------
-
-st.title("CKD Prediction App with Explainability")
+st.markdown("""
+# 🩺 CKD Risk Assessment
+Welcome to the Chronic Kidney Disease Risk Predictor. This tool provides medical-grade insights to help assess your risk.  
+""")
 
 uploaded_file = st.file_uploader("Upload CSV file with required features", type=["csv"])
 X_input_df = None
