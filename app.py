@@ -232,13 +232,19 @@ if X_input_df is not None:
     
     # 📝 Professional CKD Report
     if prediction[0] == 0 and no_ckd_proba >= 0.75:
-        st.success("🟢 CKD Unlikely — The model predicts no CKD with high confidence.")
         st.markdown(f"""
         ### 📝 CKD Risk Report  
-        ✅ **Prediction:** No Chronic Kidney Disease detected.  
-        ✅ **Confidence:** {round(no_ckd_proba, 3)} probability of no CKD.  
-        ✅ **Top contributing healthy indicators:**  
+        ✅ **Prediction:** {"No CKD" if prediction[0] == 0 else "Possible CKD"}  
+        ✅ **Confidence in no CKD:** {round(no_ckd_proba, 3)}  
+        ✅ **Confidence in CKD:** {round(proba[0], 3)}  
         """)
+        
+        if prediction[0] == 0 and no_ckd_proba >= 0.75:
+            st.success("🟢 High confidence: No CKD likely.")
+        elif prediction[0] == 0:
+            st.info("ℹ No CKD predicted, but confidence is moderate.")
+        else:
+            st.warning("⚠ Possible CKD detected. Please consult a doctor.")
         
         # List top SHAP features that push toward no CKD
         try:
