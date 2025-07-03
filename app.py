@@ -138,10 +138,9 @@ def preprocess_input(df):
 # ---------------- Streamlit App UI ----------------
 
 st.markdown("""
-<div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
-    <h4 style='color: black; margin: 0;'>🩺 CKD Risk Assessment</h4>
-</div>
-""", unsafe_allow_html=True)
+# 🩺 CKD Risk Assessment
+Welcome to the Chronic Kidney Disease Risk Predictor. This tool provides medical-grade insights to help assess your risk.  
+""")
 
 st.markdown("""
 <div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
