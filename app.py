@@ -38,8 +38,6 @@ if X_train_res is None:
 else:
     st.write("✅ X_train_res loaded. Shape:", X_train_res.shape)
 
-st.write("✅ Scaler mean_:", scaler.mean_.tolist())
-st.write("✅ Scaler var_:", scaler.var_.tolist())
 
 
 
@@ -154,16 +152,8 @@ else:
 if X_input_df is not None:
     # 🔍 Show initial features
     # 🔍 Debug before scaling
-    debug_info = []
-    debug_info.append("==== SCALER & INPUT DEBUG ====")
-    debug_info.append(f"⚡ Scaler expects features: {scaler.feature_names_in_.tolist()}")
-    debug_info.append(f"⚡ Input provided features: {X_input_df.columns.tolist()}")
-    debug_info.append(f"✅ Input values before scaling: {X_input_df.iloc[0].to_dict()}")
-    debug_info.append(f"✅ Scaler mean_: {scaler.mean_.tolist()}")
-    debug_info.append(f"✅ Scaler var_: {scaler.var_.tolist()}")
     
-    for line in debug_info:
-        st.write(line)
+
         
     # Align input features to match scaler
     for col in scaler.feature_names_in_:
@@ -190,15 +180,7 @@ if X_input_df is not None:
         if abs(z) > 5:
             st.warning(f"⚠ {col} is {round(z,2)} std devs from mean — possible outlier!")
 
-    # 🔍 Debug
-    st.write("✅ Final scaled input:", {col: round(val, 2) for col, val in zip(scaler.feature_names_in_, X_scaled[0])})
-    st.write("✅ Columns aligned. First scaled row:", X_scaled[0].tolist())
-    # Validate scaled input
-    # 🚨 Validate X_scaled before prediction
-    st.write("✅ X_scaled shape:", X_scaled.shape)
-    st.write("✅ First row of X_scaled:", {col: round(val, 3) for col, val in zip(scaler.feature_names_in_, X_scaled[0])})
-    st.write("✅ Any NaNs in X_scaled?", np.isnan(X_scaled).any())
-    # Check for NaNs
+ 
     if np.isnan(X_scaled).any():
         st.error("❌ X_scaled contains NaN values! Please check your input data or preprocessing.")
         st.stop()
