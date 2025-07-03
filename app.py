@@ -11,25 +11,22 @@ from sklearn.inspection import PartialDependenceDisplay
 
 @st.cache_resource
 def load_resources(model_choice="rf"):
-    # Load the model
     if model_choice == "rf":
-        model = joblib.load("rf_model (1).pkl")
+        model = joblib.load("rf_model_final (1).pkl")
     elif model_choice == "logistic":
-        model = joblib.load("logistic_model (1).pkl")
+        model = joblib.load("logistic_model_final (1).pkl")
     else:
         st.error("❌ Unknown model choice!")
         st.stop()
     
-    # Load the scaler
-    scaler = joblib.load("scaler (19).pkl")  # clean filename
+    scaler = joblib.load("scaler_final (1).pkl")
     
-    # Load X_train_res
     try:
-        X_train_res = joblib.load("X_train_res (1).pkl")
+        X_train_res = joblib.load("X_train_res_scaled_final.pkl")
     except Exception as e:
         st.warning(f"⚠ X_train_res failed to load: {e}")
         X_train_res = None
-    
+
     return model, scaler, X_train_res
 
 # Example: load Random Forest
@@ -51,8 +48,8 @@ st.write("✅ Scaler var_:", scaler.var_.tolist())
 # ---------------- Define final features ----------------
 
 final_features = [
-    'age', 'bp', 'sg', 'al', 'su', 'rbc', 'pc', 'bgr', 'bu', 'sc',
-    'sod', 'pot', 'hemo', 'wbcc', 'rbcc', 'htn', 'dm', 'appet', 'pe',
+    'age', 'bp', 'al', 'su', 'rbc', 'pc', 'bgr', 'bu', 'sc',
+    'sod', 'pot', 'hemo', 'wbcc', 'htn', 'dm', 'appet', 'pe',
     'ane', 'bun_sc_ratio', 'high_creatinine', 'hemo_bu'
 ]
 
@@ -67,7 +64,7 @@ def preprocess_input(df):
         if col in df.columns:
             df[col] = df[col].map(mapper).fillna(0)
 
-    numeric_cols = ['age', 'bp', 'sg', 'al', 'su', 'bgr', 'bu', 'sc',
+    numeric_cols = ['age', 'bp', 'al', 'su', 'bgr', 'bu', 'sc',
                     'sod', 'pot', 'hemo', 'wbcc', 'rbcc']
     for col in numeric_cols:
         if col in df.columns:
@@ -106,7 +103,7 @@ else:
     st.subheader("Manual Input")
 
     default = {
-        'age': 45, 'bp': 80, 'sg': 1.015, 'al': 1, 'su': 0, 'rbc': 'normal',
+        'age': 45, 'bp': 80, 'al': 1, 'su': 0, 'rbc': 'normal',
         'pc': 'normal', 'ba': 'notpresent', 'bgr': 150,
         'bu': 50, 'sc': 1.5, 'sod': 140, 'pot': 4.5, 'hemo': 12.0, 'wbcc': 7000,
         'rbcc': 4.5, 'htn': 'no', 'dm': 'no', 'appet': 'good', 'pe': 'no',
@@ -120,7 +117,6 @@ else:
         with cols[0]:
             inputs['age'] = st.number_input("Age", value=default['age'])
             inputs['bp'] = st.number_input("Blood Pressure", value=default['bp'])
-            inputs['sg'] = st.selectbox("Specific Gravity", [1.005, 1.010, 1.015, 1.020, 1.025], index=2)
             inputs['al'] = st.slider("Albumin", 0, 5, value=default['al'])
             inputs['su'] = st.slider("Sugar", 0, 5, value=default['su'])
             inputs['rbc'] = st.selectbox("Red Blood Cells", ["normal", "abnormal"])
@@ -266,18 +262,19 @@ if X_input_df is not None:
 
     # ---------------- LIME ----------------
     # ---------------- LIME ----------------
+    # ---------------- LIME ----------------
     st.subheader("🟢 LIME Explanation")
     try:
         lime_explainer = lime.lime_tabular.LimeTabularExplainer(
-            training_data=X_train_res if X_train_res is not None else X_scaled,
-            feature_names=final_features,
+            training_data=X_train_res,
+            feature_names=scaler.feature_names_in_,
             class_names=["No CKD", "CKD"],
             mode="classification"
         )
         
         lime_exp = lime_explainer.explain_instance(
             X_scaled[0],
-            lambda x: model.predict_proba(x).astype(float),  # ensure float dtype, proper slicing
+            model.predict_proba,
             num_features=10
         )
         
@@ -286,19 +283,19 @@ if X_input_df is not None:
     
     except Exception as e:
         st.error(f"LIME Error: {e}")
-
+    
     # ---------------- PDP ----------------
     st.subheader("📐 Partial Dependence Plot (PDP)")
     try:
-        feature = st.selectbox("Select feature for PDP", final_features, index=final_features.index("hemo"))
-        pdp_data = X_train_res if X_train_res is not None else X_scaled
+        feature = st.selectbox("Select feature for PDP", scaler.feature_names_in_.tolist(), index=list(scaler.feature_names_in_).index("hemo"))
+        pdp_data = X_train_res
         fig_pdp, ax_pdp = plt.subplots()
         PartialDependenceDisplay.from_estimator(
             model,
             pdp_data,
             features=[feature],
             ax=ax_pdp,
-            feature_names=final_features
+            feature_names=scaler.feature_names_in_
         )
         st.pyplot(fig_pdp)
     except Exception as e:
