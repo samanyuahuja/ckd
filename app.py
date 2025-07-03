@@ -17,58 +17,50 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* Make main background white, text black */
-    body, .stApp {
-        background-color: #ffffff;
-        color: #000000;
+    /* Make all text labels, headers, and markdown black */
+    h1, h2, h3, h4, h5, h6, .stMarkdown, .stText, .stSubheader, label {
+        color: #000000 !important;
     }
 
-    /* Sidebar background light grey */
+    /* Background white for main app */
+    .stApp {
+        background-color: #ffffff;
+    }
+
+    /* Sidebar light grey */
     section[data-testid="stSidebar"] {
         background-color: #f0f0f0;
     }
 
-    /* Header text black */
-    h1, h2, h3, h4, h5, h6, .stMarkdown {
-        color: #000000 !important;
-    }
-
-    /* Widget labels, button text black */
-    label, .stButton>button, .stSelectbox, .stNumberInput>div>input {
-        color: #000000 !important;
-    }
-
-    /* Button styles */
+    /* Button style: black text on light grey */
     .stButton>button {
         background-color: #f0f0f0;
-        border: 1px solid #000000;
         color: #000000;
+        border: 1px solid #000000;
     }
     .stButton>button:hover {
         background-color: #e0e0e0;
-        color: #000000;
     }
 
-    /* Slider track white inside black border */
+    /* Slider pipe white with black border */
     .stSlider > div[data-baseweb="slider"] > div {
-        background: #ffffff;
+        background: #ffffff !important;
         border: 1px solid #000000;
     }
 
-    /* Slider thumb (dot) blue */
+    /* Slider dot blue */
     .stSlider > div[data-baseweb="slider"] > div > div {
         background: #0072C6 !important;
     }
 
-    /* Slider number (value shown) blue */
-    .stSlider .css-14g5z1l {  /* This class may change: test in your app */
+    /* Slider number above dot blue */
+    .stSlider span {
         color: #0072C6 !important;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
-
 # ---------------- Load model, scaler, and optional training data ----------------
 
 @st.cache_resource
