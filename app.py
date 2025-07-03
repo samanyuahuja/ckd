@@ -32,11 +32,7 @@ def load_resources(model_choice="rf"):
 # Example: load Random Forest
 model, scaler, X_train_res = load_resources(model_choice="rf")
 
-# Feedback for user
-if X_train_res is None:
-    st.warning("⚠ X_train_res is missing. LIME and PDP may fail without it.")
-else:
-    st.write("✅ X_train_res loaded. Shape:", X_train_res.shape)
+)
 
 
 
