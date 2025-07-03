@@ -194,14 +194,17 @@ if X_input_df is not None:
     st.write("✅ Final scaled input:", {col: round(val, 2) for col, val in zip(scaler.feature_names_in_, X_scaled[0])})
     st.write("✅ Columns aligned. First scaled row:", X_scaled[0].tolist())
     # Validate scaled input
+    st.write("✅ X_scaled shape:", X_scaled.shape)
+    st.write("✅ First row of X_scaled:", X_scaled[0])
+    
     if np.isnan(X_scaled).any():
-        st.error("❌ X_scaled has NaNs. Fix input values!")
+        st.error("❌ X_scaled has NaN values! Check your input data or preprocessing.")
         st.stop()
     
     if X_scaled.shape[1] != len(scaler.feature_names_in_):
-        st.error(f"❌ X_scaled has wrong number of columns: {X_scaled.shape[1]} vs {len(scaler.feature_names_in_)}")
+        st.error(f"❌ X_scaled column count mismatch: got {X_scaled.shape[1]}, expected {len(scaler.feature_names_in_)}")
         st.stop()
-    # Predict
+        # Predict
     prediction = model.predict(X_scaled)
     proba = model.predict_proba(X_scaled)[:, 1]
 
