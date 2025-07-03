@@ -6,7 +6,28 @@ import lime.lime_tabular
 import matplotlib.pyplot as plt
 import joblib
 from sklearn.inspection import PartialDependenceDisplay
+st.set_page_config(
+    page_title="CKD Prediction App",
+    page_icon="🩺",
+    layout="centered",
+    initial_sidebar_state="auto"
+)
 
+# Force light theme via CSS
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: #f9f9f9;
+        color: #000000;
+    }
+    .stApp {
+        background-color: #ffffff;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 # ---------------- Load model, scaler, and optional training data ----------------
 
 @st.cache_resource
