@@ -199,7 +199,7 @@ if X_input_df is not None:
     prediction = model.predict(X_scaled)
     proba = model.predict_proba(X_scaled)[:, 1]
 
-    st.subheader("🔮 Prediction Result")
+    st.subheader("🔹 Prediction Result")
     if len(prediction) == 1:
         st.write("CKD Likely:" if prediction[0] else "CKD Unlikely")
         st.write("Probability:", round(proba[0], 3))
@@ -255,7 +255,7 @@ if X_input_df is not None:
     else:
         st.info(f"ℹ The model does not have high confidence in no CKD (no CKD probability = {round(no_ckd_proba, 3)}).")
     # ---------------- SHAP ----------------
-    st.subheader("📊 SHAP Explanation")
+    st.subheader("🔹 SHAP Explanation")
 
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_scaled)
@@ -282,7 +282,7 @@ if X_input_df is not None:
 
         # Waterfall plot
         try:
-            st.subheader("SHAP Waterfall Plot (Instance 0)")
+            st.subheader("🔹 SHAP Waterfall Plot (Instance 0)")
             fig_wf, ax_wf = plt.subplots(figsize=(10, 6))
             shap.plots.waterfall(shap_exp[0], show=False)
             st.pyplot(fig_wf)
@@ -291,7 +291,7 @@ if X_input_df is not None:
             
             # Summary bar plot
         try:
-            st.subheader("SHAP Summary Bar Plot")
+            st.subheader("🔹 SHAP Summary Bar Plot")
             fig_bar, ax_bar = plt.subplots(figsize=(10, 6))
             shap.plots.bar(shap_exp, show=False)
             st.pyplot(fig_bar)
@@ -303,7 +303,7 @@ if X_input_df is not None:
     # ---------------- LIME ----------------
     # ---------------- LIME ----------------
     # ---------------- LIME ----------------
-    st.subheader("🟢 LIME Explanation")
+    st.subheader("🔹 LIME Explanation")
     try:
         lime_explainer = lime.lime_tabular.LimeTabularExplainer(
             training_data=X_train_res,
@@ -328,7 +328,7 @@ if X_input_df is not None:
     
 
     # Move selectbox outside plot logic so it just stores state
-    st.subheader("📐 Partial Dependence Plots (PDP) for All Features")
+    st.subheader("🔹 Partial Dependence Plots (PDP) for All Features")
 
     try:
         fig, axs = plt.subplots(
