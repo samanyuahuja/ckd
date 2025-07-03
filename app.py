@@ -55,7 +55,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-)
+
 # ---------------- Load model, scaler, and optional training data ----------------
 
 @st.cache_resource
