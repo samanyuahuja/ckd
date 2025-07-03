@@ -146,7 +146,7 @@ else:
             inputs['ane'] = st.selectbox("Anemia", ["yes", "no"])
 
 
-        submit = st.button("🔹 Predict CKD Risk")
+        submit = st.form_submit_button("🔹 Predict CKD Risk")
 
     if submit:
         user_df = pd.DataFrame([inputs])
