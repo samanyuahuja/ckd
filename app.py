@@ -13,19 +13,19 @@ from sklearn.inspection import PartialDependenceDisplay
 def load_resources(model_choice="rf"):
     # Load the model
     if model_choice == "rf":
-        model = joblib.load("rf_model.pkl")
+        model = joblib.load("rf_model (1).pkl")
     elif model_choice == "logistic":
-        model = joblib.load("logistic_model.pkl")
+        model = joblib.load("logistic_model (1).pkl")
     else:
         st.error("❌ Unknown model choice!")
         st.stop()
     
     # Load the scaler
-    scaler = joblib.load("scaler (18).pkl")  # clean filename
+    scaler = joblib.load("scaler (19).pkl")  # clean filename
     
     # Load X_train_res
     try:
-        X_train_res = joblib.load("X_train_res.pkl")
+        X_train_res = joblib.load("X_train_res (1).pkl")
     except Exception as e:
         st.warning(f"⚠ X_train_res failed to load: {e}")
         X_train_res = None
