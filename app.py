@@ -301,19 +301,32 @@ if X_input_df is not None:
     
 
     # Move selectbox outside plot logic so it just stores state
-    st.subheader("📐 Partial Dependence Plot (PDP)")
-    feature = st.selectbox("Select feature for PDP", final_features, index=final_features.index("hemo"))
+    st.subheader("📐 Partial Dependence Plots (PDP) for All Features")
+
+    try:
+        fig, axs = plt.subplots(
+            nrows=(len(final_features) + 2) // 3, 
+            ncols=3, 
+            figsize=(15, 5 * ((len(final_features) + 2) // 3))
+        )
     
-    if st.button("Generate PDP Plot"):
-        try:
-            fig_pdp, ax_pdp = plt.subplots()
+        axs = axs.flatten()
+    
+        for i, feature in enumerate(final_features):
             PartialDependenceDisplay.from_estimator(
                 model,
                 X_train_res,
                 features=[feature],
-                ax=ax_pdp,
+                ax=axs[i],
                 feature_names=final_features
             )
-            st.pyplot(fig_pdp)
-        except Exception as e:
-            st.error(f"PDP Error: {e}")
+            axs[i].set_title(f"PDP: {feature}")
+    
+        # Hide any unused subplots
+        for j in range(i + 1, len(axs)):
+            fig.delaxes(axs[j])
+    
+        st.pyplot(fig)
+    
+    except Exception as e:
+        st.error(f"PDP generation failed: {e}")
