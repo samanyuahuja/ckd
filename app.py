@@ -41,11 +41,21 @@ st.markdown(
     .stButton>button:hover {
         background-color: #e0e0e0;
     }
-    /* Force all labels, markdown, and text elements to black */
-    label, .css-10trblm, .css-1cpxqw2, .stMarkdown, .stText, .stSubheader, .stHeader {
+    /* Force UI labels to look like small black text */
+    label, .stFileUploader label, .stNumberInput label, .stSelectbox label, .stSlider label, .stTextInput label {
+        font-size: 14px !important;
+        font-weight: normal !important;
         color: #000000 !important;
     }
 
+    /* Ensure markdown headers and form text is also black and small if needed */
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
+        color: #000000 !important;
+    }
+
+    .stSubheader, .stHeader {
+        color: #000000 !important;
+    }
  
     </style>
     """,
