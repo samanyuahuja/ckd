@@ -166,7 +166,6 @@ if X_input_df is not None:
     debug_info.append(f"✅ Scaler mean_: {scaler.mean_.tolist()}")
     debug_info.append(f"✅ Scaler var_: {scaler.var_.tolist()}")
     
-    # Show in Streamlit
     for line in debug_info:
         st.write(line)
         
@@ -186,7 +185,17 @@ if X_input_df is not None:
     # ✅ Now safe to transform
     X_scaled = scaler.transform(X_input_df)
 
+    # 🚨 Outlier z-score check
+    for col, val in X_input_df.iloc[0].items():
+        idx = scaler.feature_names_in_.tolist().index(col)
+        mean = scaler.mean_[idx]
+        std = np.sqrt(scaler.var_[idx])
+        z = (val - mean) / std if std != 0 else 0
+        if abs(z) > 5:
+            st.warning(f"⚠ {col} is {round(z,2)} std devs from mean — possible outlier!")
+
     # 🔍 Debug
+    st.write("✅ Final scaled input:", {col: round(val, 2) for col, val in zip(scaler.feature_names_in_, X_scaled[0])})
     st.write("✅ Columns aligned. First scaled row:", X_scaled[0].tolist())
 
     # Predict
