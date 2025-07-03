@@ -166,7 +166,8 @@ if uploaded_file:
     except Exception as e:
         st.error(f"❌ File read error: {e}")
         st.stop()
-
+else:
+    
     st.info("Please fill out the form below if you do not have a CSV file.")
 
     default = {
