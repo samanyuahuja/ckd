@@ -136,12 +136,19 @@ def preprocess_input(df):
     return df[final_features]
 
 # ---------------- Streamlit App UI ----------------
-st.markdown("""
-# 🩺 CKD Risk Assessment
-Welcome to the Chronic Kidney Disease Risk Predictor. This tool provides medical-grade insights to help assess your risk.  
-""")
 
-st.markdown("### 🔹 Upload Your Medical Report (CSV Format)")
+st.markdown("""
+<div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
+    <h4 style='color: black; margin: 0;'>🩺 CKD Risk Assessment</h4>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
+    <h4 style='color: black; margin: 0;'>🔹 Upload Your Medical Report (CSV Format)</h4>
+</div>
+""", unsafe_allow_html=True)
+
 uploaded_file = st.file_uploader(
     label="Upload a CSV file containing your medical data.",
     type=["csv"],
@@ -161,7 +168,12 @@ if uploaded_file:
         st.error(f"❌ File read error: {e}")
         st.stop()
 else:
-    st.markdown("### 🔹 Or Manually Enter Your Medical Information")
+        st.markdown("""
+    <div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
+        <h4 style='color: black; margin: 0;'>🔹 Or Manually Enter Your Medical Information</h4>
+    </div>
+    """, unsafe_allow_html=True)
+   
     st.info("Please fill out the form below if you do not have a CSV file.")
 
     default = {
@@ -173,6 +185,10 @@ else:
     }
 
 
+    st.markdown("""
+    <div style='background-color: #f0f0f0; padding: 15px; border-radius: 6px; border: 1px solid #ccc;'>
+    """, unsafe_allow_html=True)
+    
     with st.form("manual_input"):
         cols = st.columns(3)
         inputs = {}
@@ -183,9 +199,8 @@ else:
             inputs['su'] = st.slider("Sugar", 0, 5, value=default['su'])
             inputs['rbc'] = st.selectbox("Red Blood Cells", ["normal", "abnormal"])
             inputs['pc'] = st.selectbox("Pus Cell", ["normal", "abnormal"])
-
+    
         with cols[1]:
-            
             inputs['ba'] = st.selectbox("Bacteria", ["present", "notpresent"])
             inputs['bgr'] = st.number_input("Blood Glucose Random", value=default['bgr'])
             inputs['bu'] = st.number_input("Blood Urea", value=default['bu'])
@@ -193,8 +208,8 @@ else:
             inputs['sod'] = st.number_input("Sodium", value=default['sod'])
             inputs['pot'] = st.number_input("Potassium", value=default['pot'])
             inputs['hemo'] = st.number_input("Hemoglobin", value=default['hemo'])
+    
         with cols[2]:
-            
             inputs['wbcc'] = st.number_input("WBC Count", value=default['wbcc'])
             inputs['rbcc'] = st.number_input("RBC Count", value=default['rbcc'])
             inputs['htn'] = st.selectbox("Hypertension", ["yes", "no"])
@@ -202,9 +217,10 @@ else:
             inputs['appet'] = st.selectbox("Appetite", ["good", "poor"])
             inputs['pe'] = st.selectbox("Pedal Edema", ["yes", "no"])
             inputs['ane'] = st.selectbox("Anemia", ["yes", "no"])
-
-
+    
         submit = st.form_submit_button("🔹 Predict CKD Risk")
+    
+    st.markdown("</div>", unsafe_allow_html=True)
 
     if submit:
         user_df = pd.DataFrame([inputs])
@@ -257,7 +273,11 @@ if X_input_df is not None:
     prediction = model.predict(X_scaled)
     proba = model.predict_proba(X_scaled)[:, 1]
 
-    st.subheader("🔹 Prediction Result")
+    st.markdown("""
+    <div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
+        <h4 style='color: black; margin: 0;'>🔹 Prediction Result</h4>
+    </div>
+    """, unsafe_allow_html=True)
     if len(prediction) == 1:
         st.write("CKD Likely:" if prediction[0] else "CKD Unlikely")
         st.write("Probability:", round(proba[0], 3))
@@ -331,7 +351,11 @@ if X_input_df is not None:
     else:
         st.info(f"ℹ The model does not have high confidence in no CKD (no CKD probability = {round(no_ckd_proba, 3)}).")
     # ---------------- SHAP ----------------
-    st.subheader("🔹 SHAP Explanation")
+    st.markdown("""
+    <div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
+        <h4 style='color: black; margin: 0;'>🔹 SHAP Explanation</h4>
+    </div>
+    """, unsafe_allow_html=True)
 
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_scaled)
@@ -358,7 +382,11 @@ if X_input_df is not None:
 
         # Waterfall plot
         try:
-            st.subheader("🔹 SHAP Waterfall Plot (Instance 0)")
+            st.markdown("""
+            <div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
+                <h4 style='color: black; margin: 0;'>🔹 SHAP Waterfall Plot</h4>
+            </div>
+            """, unsafe_allow_html=True)
             fig_wf, ax_wf = plt.subplots(figsize=(10, 6))
             shap.plots.waterfall(shap_exp[0], show=False)
             st.pyplot(fig_wf)
@@ -367,7 +395,11 @@ if X_input_df is not None:
             
             # Summary bar plot
         try:
-            st.subheader("🔹 SHAP Summary Bar Plot")
+            st.markdown("""
+            <div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
+                <h4 style='color: black; margin: 0;'>🔹 SHAP Summary Bar Plot</h4>
+            </div>
+            """, unsafe_allow_html=True)
             fig_bar, ax_bar = plt.subplots(figsize=(10, 6))
             shap.plots.bar(shap_exp, show=False)
             st.pyplot(fig_bar)
@@ -379,7 +411,11 @@ if X_input_df is not None:
     # ---------------- LIME ----------------
     # ---------------- LIME ----------------
     # ---------------- LIME ----------------
-    st.subheader("🔹 LIME Explanation")
+    st.markdown("""
+    <div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
+        <h4 style='color: black; margin: 0;'>🔹 LIME Explanation</h4>
+    </div>
+    """, unsafe_allow_html=True)
     try:
         lime_explainer = lime.lime_tabular.LimeTabularExplainer(
             training_data=X_train_res,
@@ -404,7 +440,12 @@ if X_input_df is not None:
     
 
     # Move selectbox outside plot logic so it just stores state
-    st.subheader("🔹 Partial Dependence Plots (PDP) for All Features")
+        # PDP
+    st.markdown("""
+    <div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
+        <h4 style='color: black; margin: 0;'>🔹 Partial Dependence Plot (PDP)</h4>
+    </div>
+    """, unsafe_allow_html=True)
 
     try:
         fig, axs = plt.subplots(
