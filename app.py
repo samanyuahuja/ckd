@@ -166,13 +166,7 @@ if uploaded_file:
     except Exception as e:
         st.error(f"❌ File read error: {e}")
         st.stop()
-else:
-    st.markdown("""
-    <div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
-        <h4 style='color: black; margin: 0;'>🔹 Or Manually Enter Your Medical Information</h4>
-    </div>
-    """, unsafe_allow_html=True)
-   
+
     st.info("Please fill out the form below if you do not have a CSV file.")
 
     default = {
