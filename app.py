@@ -174,7 +174,7 @@ else:
     </div>
     """, unsafe_allow_html=True)
    
-    st.info("Please fill out the form below if you do not have a CSV file.")
+        st.info("Please fill out the form below if you do not have a CSV file.")
 
     default = {
         'age': 45, 'bp': 80, 'al': 1, 'su': 0, 'rbc': 'normal',
