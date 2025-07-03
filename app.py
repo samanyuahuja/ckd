@@ -299,17 +299,21 @@ if X_input_df is not None:
     
     # ---------------- PDP ----------------
     st.subheader("📐 Partial Dependence Plot (PDP)")
-    try:
-        feature = st.selectbox("Select feature for PDP", scaler.feature_names_in_.tolist(), index=list(scaler.feature_names_in_).index("hemo"))
-        pdp_data = X_train_res
-        fig_pdp, ax_pdp = plt.subplots()
-        PartialDependenceDisplay.from_estimator(
-            model,
-            pdp_data,
-            features=[feature],
-            ax=ax_pdp,
-            feature_names=scaler.feature_names_in_
-        )
-        st.pyplot(fig_pdp)
-    except Exception as e:
-        st.error(f"PDP Error: {e}")
+
+    # Move selectbox outside plot logic so it just stores state
+    feature = st.selectbox("Select feature for PDP", final_features, index=final_features.index("hemo"))
+    
+    if st.button("Generate PDP Plot"):
+        try:
+            pdp_data = X_train_res if X_train_res is not None else X_scaled
+            fig_pdp, ax_pdp = plt.subplots()
+            PartialDependenceDisplay.from_estimator(
+                model,
+                pdp_data,
+                features=[feature],
+                ax=ax_pdp,
+                feature_names=final_features
+            )
+            st.pyplot(fig_pdp)
+        except Exception as e:
+            st.error(f"PDP Error: {e}")
