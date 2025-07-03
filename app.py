@@ -353,10 +353,9 @@ if X_input_df is not None:
         st.info(f"ℹ The model does not have high confidence in no CKD (no CKD probability = {round(no_ckd_proba, 3)}).")
     # ---------------- SHAP ----------------
     st.markdown("""
-    <div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
-        <h4 style='color: black; margin: 0;'>🔹 SHAP Explanation</h4>
-    </div>
-    """, unsafe_allow_html=True)
+    # 🔹 SHAP Explanation
+    """)
+    
 
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_scaled)
@@ -413,10 +412,8 @@ if X_input_df is not None:
     # ---------------- LIME ----------------
     # ---------------- LIME ----------------
     st.markdown("""
-    <div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
-        <h4 style='color: black; margin: 0;'>🔹 LIME Explanation</h4>
-    </div>
-    """, unsafe_allow_html=True)
+    # 🔹 LIME Explanation
+    """)
     try:
         lime_explainer = lime.lime_tabular.LimeTabularExplainer(
             training_data=X_train_res,
@@ -443,10 +440,9 @@ if X_input_df is not None:
     # Move selectbox outside plot logic so it just stores state
         # PDP
     st.markdown("""
-    <div style='background-color: #f0f0f0; padding: 10px; border-radius: 6px; border: 1px solid #ccc;'>
-        <h4 style='color: black; margin: 0;'>🔹 Partial Dependence Plot (PDP)</h4>
-    </div>
-    """, unsafe_allow_html=True)
+    # 🔹 Partial Dependence Plot (PDP)
+    """)
+
 
     try:
         fig, axs = plt.subplots(
